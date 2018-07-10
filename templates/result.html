@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <title>查看结果</title>
+  </head>
+  <body>
+	<main role="main" class="container">
+		<h5>今晚可供选择的菜：</h5>
+		<table class="table table-striped">
+			<tbody>
+				<tr class="d-flex">
+                    <td class="col-2">菜名字</td>
+<!--[dish_num, dish_name, list(what_i_have), list(material still needed), item number still needed]-->
+                    <td class='col-8'>所需食材(缺的用粗体)</td>
+                    <td class="col-2">所缺种类</td>
+				</tr>
+				{% for option in data %}
+				<tr class="d-flex">
+                    <td class="col-2">{{ option[1] }}</td>
+<!--[dish_num, dish_name, list(what_i_have), list(material still needed), item number still needed]-->
+                    <td class='col-9'>
+                        {% for item in option[2] %}
+                            {{ item }}
+                        {% endfor %}
+                        {% for item in option[3] %}
+                            <strong>{{ item }}</strong>
+                        {% endfor %}
+                    </td>
+                    <td class="col-1">{{ option[4] }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+        <form name="go_to_receipe_page" action="{{ url_for('receipes') }}">
+            <input type="submit" value="查看菜谱">
+        </form>
+        <form name="go_to_fridge_page" action="{{ url_for('fridges') }}">
+            <input type="submit" value="修改冰箱">
+        </form>
+
+	</main>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  </body>
+</html>
+

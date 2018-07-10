@@ -1,0 +1,94 @@
+I 两张表。
+表1：菜名编号，菜名，所用食材。例如：  1，番茄炒蛋，番茄 鸡蛋；2，红烧肉，猪肉 糖 八角；…
+表2：食材名和食材编号。例如：  西红柿 1； 鸡蛋 2； 猪肉 3； 糖 4； 八角 5；…
+
+II 界面：
+有两个页面。
+一个页面是修改菜谱的页面，可以先提供一个默认版本，用户也可以把默认版本修改掉换成自己家菜谱。可以贡献菜谱。
+另一个页面是冰箱页面，选择现在冰箱里有什么吃的，然后提交，就会给出“可以做什么菜”的报告：
+例如：可以做  红烧肉  已有：猪肉  还缺：糖，八角
+
+III 菜谱页面:
+类似留言板：插入菜谱，删除菜谱
+复杂版本：删除时确认；可以修改；搜索出西红柿的标签，点西红柿即可；西红柿和番茄代表同样的东西，怎么办？
+
+IV 冰箱页面：
+类似留言板：左右两个列表：左边是冰箱里没加的，右边是冰箱有的。支持两边互相加。列表得能搜索
+每个用户都有一个冰箱
+
+V 报告页面：
+点击提交之后跳转到报告页面。
+给出 可以做  红烧肉  已有：猪肉  还缺：糖，八角。
+如果不点提交，也可以访问该页面，给出的结果是上次搜索的结果
+
+
+
+
+数据库：
+插入用户
+	insertUser
+	Input: 
+		string user_id
+		list stock = []
+	Output:
+		None
+插入菜谱（插入新的食材）
+	insertReceipeEntry()
+	Input:
+		string dish_name, 
+		list materials
+	Output:
+		None
+删除菜谱
+	deleteReceipeEntry()
+	Input:
+		int dish_id
+	Output:
+		None
+修改菜谱
+	##
+更新冰箱：插入
+	insertToFridge()
+	Input:
+		string user_id
+		list materials
+	Output:
+		None
+更新冰箱：删除（假设食材必须从表里选）
+	deleteFromFridge()
+	Input:
+		string user_id
+		list materials
+	Output:
+		None
+给出所有菜谱以供查询
+	deliverReceipe():
+	Input:
+		None
+	Output:
+		list [(dish_id, dish_name, list materials), … ]
+给出用户冰箱以供查询
+	deliverFridge():
+	Input:
+		int user_id
+	Output:
+		list materials 
+
+所需页面：
+菜谱：/receipe：	/insert, /delete (, /edit)
+冰箱：/fridge：	/insert, /delete
+报告：/report：
+
+
+
+
+
+
+
+//用户表：用户ID -> 冰箱（拥有食材list： 类型string）
+//	addUser():
+//	Input:
+//		string user_id
+//		list material_id
+//	Output:
+//		None
