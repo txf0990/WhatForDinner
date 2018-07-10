@@ -32,9 +32,19 @@ class Database(object):
     def insertToFridge(self, user_id, stock):  # stock must not exist in fridge
         cursor_object = self.c.execute("SELECT stock FROM fridges WHERE user_id=?", (user_id,))
         list_cursor_object = list(cursor_object)  # list_cursor_object is a list of tuple, like: [(u'TuDou XiHongShi HuangGua',)]
-        stock_text = list_cursor_object[0][0]
-        stock_text = Unicode_to_UTF8(stock_text) + " " + ' '.join(stock)
-        self.c.execute("UPDATE fridges SET stock=? WHERE user_id=?", (UTF8_to_Unicode(stock_text), user_id))
+        stock_text = list_cursor_object[0][0]       
+        # stock_text is what i already have in text
+        # stock is a list that i wish to add.
+        stock_text = stock_text.split(' ')
+        # now, stock_text is also a list.
+        for item in stock_text:
+            if item in stock:
+                stock.remove(item)
+        stock_text = ' '.join(stock_text)
+        stock = ' '.join(stock)
+        stock_text = stock_text + " " + stock
+
+        self.c.execute("UPDATE fridges SET stock=? WHERE user_id=?", (stock_text, user_id))
         self.conn.commit()
 
     def deleteFromFridge(self, user_id, delete_list):   # item in delete_list must exist in fridge
@@ -43,7 +53,7 @@ class Database(object):
         stock_text = list_cursor_object[0][0]
         stock_list = stock_text.split(' ')
         for item in delete_list:
-            stock_list.remove(UTF8_to_Unicode(item))
+            stock_list.remove(item)
         stock_text = ' '.join(stock_list)
         self.c.execute("UPDATE fridges SET stock=? WHERE user_id=?", (stock_text, user_id))
         self.conn.commit()

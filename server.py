@@ -64,11 +64,11 @@ def fridges():
 def fridges_insert():
     database = Database(filename)
     user_id = 1
+    # user_fridge is a list of what is already in fridge
     if request.method == 'POST':
         add_stock_text = request.form['content']
         if add_stock_text == '':
             return redirect(url_for('fridges'))
-        add_stock_text = Unicode_to_UTF8(add_stock_text)
         add_stock_text = add_stock_text.split(' ')
         database.insertToFridge(user_id, add_stock_text)
     return redirect(url_for('fridges'))
