@@ -106,3 +106,4 @@ venv.bak/
 test.db
 test.py
 .DS_Store
+*.swp
