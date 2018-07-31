@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Debug{% endblock %}
+{% block navbar %}
+    {% include "navbar.html" %}
+{% endblock %}
+{% block content %}
+    <h5>Debug</h5>
+    Logged in as: {{ user_id }} <br>
+{% endblock %}

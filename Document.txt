@@ -74,6 +74,16 @@ V 报告页面：
 	Output:
 		list materials 
 
+验证是否是正确的用户名密码：
+	verifyPassword():
+	Input: 
+		string user_name
+		string password
+	Output:
+		int user_id  (acceptable)
+		-1	(unacceptable)
+
+
 所需页面：
 菜谱：/receipe：	/insert, /delete (, /edit)
 冰箱：/fridge：	/insert, /delete
@@ -92,3 +102,25 @@ V 报告页面：
 //		list material_id
 //	Output:
 //		None
+
+
+
+//  登录部分：
+// 实现登录 debug 页面：显示当前登录的是谁（用户请求时，查看 session，看是谁）
+// 实现一个 login 页面（url：/， 有一个登录框，action 是 login）
+// 实现 login 页面，判断 userid 和加盐加密密码是否匹配。如果匹配，redirect 并设置 session 的 user_name。如果不匹配，返回登录页面. 这个 login 没有自己的页面，他是 redirect 的，要么到 result，要么到/页面
+// 实现 logout。让网站把已经给出去的 session 记录抹掉。（返回时，将 session 重置）
+// 功能页面： 加载时先判断是否登录。如未登录，redirect 到主页。
+// 功能页面： 每一个功能页面的函数里都要夹带用户信息————（查 flask 功能： 在登陆之后，调子函数之前就能确定用户是谁了）
+// 功能页面： 根据用户更改逻辑（查表给结果的时候都要判断 userid 了。）
+
+一个表： 
+记录的是 1. 用户的 id， 2. 用户名， 3. 用户的 password+salt 的 md5
+返回给用户的 cookie 是   用户 id+密码加盐的 md5加密。
+
+用户访问网站， 访问 url：/
+返回登录表单
+用户填表单之后， 采用 post 方法， 请求 url： /login， 两个 field： username+password
+返回 redirect 页面： /result  并且携带 cookie： {userid+passhash}
+用户下次访问主页，就用这个 cookie
+用户访问任何页面都要先检查登录是否有效。 如果登录无效，直接 redirect 到主页 url：/

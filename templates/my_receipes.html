@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}查看我的菜谱{% endblock %}
+{% block navbar %}
+    {% set page_index = 2 %}
+    {% include "navbar.html" %}
+{% endblock %}
+{% block content %}
+		<h5>My Receipes</h5>
+
+		<table class="table table-striped">
+			<tbody>
+				{% for receipe in receipes %}
+				<tr class="d-flex">
+					<td class="col-1">{{ receipe[0] }}</td>
+					<td class="col-2">{{ receipe[1] }}</td>
+					<td class="col-8">{{ receipe[2] }}</td>
+					<td class="col-1"><a href="{{ url_for('my_receipes_delete', id=receipe[0]) }}">
+						<button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					</a></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+        <form name="Message" action="{{ url_for('my_receipes_insert') }}" method="POST">
+            插入菜谱: <input type="text" name="content"> <input type="submit" value="提交">
+        </form>
+{% endblock %}
