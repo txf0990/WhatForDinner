@@ -2,7 +2,11 @@
 {% block title %}查看菜谱{% endblock %}
 {% block navbar %}
     {% set page_index = 1 %}
-    {% include "navbar.html" %}
+    {% if user_id==0 %}
+        {% include "admin_navbar.html" %}
+    {% else %}
+        {% include "navbar.html" %}
+    {% endif %}
 {% endblock %}
 {% block content %}
 		<h5>Receipes</h5>
@@ -11,12 +15,16 @@
 			<tbody>
 				{% for receipe in receipes %}
 				<tr class="d-flex">
+                    {% if user_id==0 %}
 					<td class="col-1">{{ receipe[0] }}</td>
+                    {% endif %}
 					<td class="col-2">{{ receipe[1] }}</td>
 					<td class="col-8">{{ receipe[2] }}</td>
+                    {% if user_id==0 %}
 					<td class="col-1"><a href="{{ url_for('receipes_delete', id=receipe[0]) }}">
 						<button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 					</a></td>
+                    {% endif %}
 				</tr>
 				{% endfor %}
 			</tbody>

@@ -11,7 +11,6 @@
 			<tbody>
 				{% for receipe in receipes %}
 				<tr class="d-flex">
-					<td class="col-1">{{ receipe[0] }}</td>
 					<td class="col-2">{{ receipe[1] }}</td>
 					<td class="col-8">{{ receipe[2] }}</td>
 					<td class="col-1"><a href="{{ url_for('my_receipes_delete', id=receipe[0]) }}">

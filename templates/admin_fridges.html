@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}查看谁的冰箱{% endblock %}
+{% block navbar %}
+    {% set page_index = 3 %}
+    {% include "admin_navbar.html" %}
+{% endblock %}
+{% block content %}
+<h5>User {{ user_id }}'s Fridge</h5>
+<form name="find_user" action="{{ url_for('admin_fridges', user_id=user_id) }}" method="POST">
+    下一位查看的用户 ID: <input type="number" name="next_user_id"> <input type="submit" value="提交">
+</form> 
+<br>
+		<table class="table table-striped">
+			<tbody>
+				{% for material in fridges %}
+				<tr class="d-flex">
+                    {% if material != ''%}
+                        <td class="col-1">{{ material }}</td>
+                        <td class="col-1"><a href="{{ url_for('admin_fridges_delete', name=material, current_user_id=user_id) }}">
+                            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </a></td>
+                    {% endif %}
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+        <form name="Message" action="{{ url_for('admin_fridges_insert') }}" method="POST">
+            插入冰箱: <input type="text" name="content"> <br>
+            当前处理的用户 ID: <input type="radio" name="current_user_id" value="{{ user_id }}" checked="checke        d">{{ user_id }}<br><br>
+            <input type="submit" value="插入">
+        </form>
+        <br><br>
+{% endblock %}

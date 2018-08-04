@@ -46,8 +46,11 @@ class Database(object):
         last_insert_id = self.insertReceipeEntry(dish_name, materials)
         cursor_object = self.c.execute("SELECT * FROM user_receipes WHERE user_id=?",(user_id,))
         list_cursor_object = list(cursor_object)        # [(1,'1 2 3')]
-        receipe_list_text = list_cursor_object[0][1]
-        receipe_list = receipe_list_text.split(' ')     # ['1','2','3']
+        receipe_list = []
+        receipe_list_text = ''
+        if len(list_cursor_object) != 0:
+            receipe_list_text = list_cursor_object[0][1]
+            receipe_list = receipe_list_text.split(' ')     # ['1','2','3']
         if not str(last_insert_id) in receipe_list:
             receipe_list_text = receipe_list_text + ' ' + str(last_insert_id)
             self.c.execute("UPDATE user_receipes SET user_receipes=? WHERE user_id=?", (receipe_list_text, user_id))    
@@ -65,14 +68,18 @@ class Database(object):
     def deliverMyReceipe(self, user_id):
         cursor_object = self.c.execute("SELECT * FROM user_receipes WHERE user_id=?", (user_id,))
         list_cursor_object = list(cursor_object)    # a list of receipes to show: [(1,'1 2 3')] user_id, user_receipes
-        list_cursor_object = list_cursor_object[0][1].split(' ')        # ['1','2','3']
         receipes_to_show = []
-        for dish_id in list_cursor_object:
-            temp_object = self.c.execute("SELECT * FROM receipes WHERE dish_id=?", (int(dish_id),))
-            list_temp_object = list(temp_object)        # [(1,'西红柿炒鸡蛋','西红柿 鸡蛋')]
-            if len(list_temp_object) != 0:
-                temp_tuple = list_temp_object[0]
-                receipes_to_show.append(temp_tuple)
+        if len(list_cursor_object) != 0:
+            list_cursor_object = list_cursor_object[0][1].split(' ')        # ['1','2','3']
+            if len(list_cursor_object) != 0:
+                for dish_id in list_cursor_object:
+                    if dish_id == '':
+                        continue
+                    temp_object = self.c.execute("SELECT * FROM receipes WHERE dish_id=?", (int(dish_id),))
+                    list_temp_object = list(temp_object)        # [(1,'西红柿炒鸡蛋','西红柿 鸡蛋')]
+                    if len(list_temp_object) != 0:
+                        temp_tuple = list_temp_object[0]
+                        receipes_to_show.append(temp_tuple)
         return receipes_to_show               # I want to return a list of tuple.
 
 #######
@@ -81,11 +88,20 @@ class Database(object):
     def insertToFridge(self, user_id, stock):  # stock must not exist in fridge
         cursor_object = self.c.execute("SELECT stock FROM fridges WHERE user_id=?", (user_id,))
         list_cursor_object = list(cursor_object)  # list_cursor_object is a list of tuple, like: [(u'TuDou XiHongShi HuangGua',)]
-        stock_text = list_cursor_object[0][0]       
+        stock_text = ''
+        if len(list_cursor_object) != 0:
+            stock_text = list_cursor_object[0][0]       
         # stock_text is what i already have in text
         # stock is a list that i wish to add.
         stock_text = stock_text.split(' ')
+        for item in stock_text:
+            if item == '':
+                stock_text.remove(item)
+        for item in stock:
+            if item == '':
+                stock.remove(item)
         # now, stock_text is also a list.
+        # there is no '' in either list.
         for item in stock_text:
             if item in stock:
                 stock.remove(item)
@@ -117,11 +133,11 @@ class Database(object):
     def verifyPassword(self, user_name, password):
         cursor_object = self.c.execute("SELECT * FROM users WHERE user_name=?", (user_name,))
         list_cursor_object = list(cursor_object)
-        if len(list_cursor_object) == 0:
+        if len(list_cursor_object) == 0:   # user does not exist.
             return -1
-        if (list_cursor_object[0][2] != password):
-            return -1
-        return list_cursor_object[0][0]
+        if (list_cursor_object[0][3] != password):  # password mismatch
+            return -2
+        return list_cursor_object[0][0]         # return the user_id
 
 def UTF8_to_Unicode(s):
     return s.decode('utf8')

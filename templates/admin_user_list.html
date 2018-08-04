@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}用户列表{% endblock %}
+{% block navbar %}
+    {% set page_index = 5 %}
+    {% include "admin_navbar.html" %}
+{% endblock %}
+{% block content %}
+<h5>User List</h5>
+<br>
+		<table class="table table-striped">
+			<tbody>
+				<tr class="d-flex">
+                    <td class="col-2">user id</td>
+                    <td class="col-3">user name</td>
+                    <td class="col-7">user email</td>
+				</tr>
+				{% for user in users %}
+				<tr class="d-flex">
+                    <td class="col-2">{{ user[0] }}</td>
+                    <td class="col-3">{{ user[1] }}</td>
+                    <td class="col-7">{{ user[2] }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+        <br><br>
+{% endblock %}

@@ -9,9 +9,13 @@
             Username: <input type="text" name="user_name"><br>
             Password: <input type="password" name="password">
             <input type="submit" value="登录">
+            <br>
+            {% if status==-1 %}用户不存在{% endif %}
+            {% if status==-2 %}密码不匹配{% endif %}
         </form>
 <br><br><br>
 cheat:<br>
+admin       admin<br>
 hello       123321<br>
 world       456654<br>
 happy       789987<br>

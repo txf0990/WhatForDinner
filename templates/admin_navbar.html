@@ -1,0 +1,25 @@
+<nav class="navbar fixed-top navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+    <a class="navbar-brand" href="{{ url_for('index') }}">吃点啥</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item{% if page_index==1 %} active{% endif %}">
+            <a class="nav-link" href="{{ url_for('receipes') }}">所有菜谱{% if page_index==1 %}<span class="sr-only">(current)</span>{% endif %}</a>
+      </li>
+      <li class="nav-item{% if page_index==2 %} active{% endif %}">
+            <a class="nav-link" href="{{ url_for('admin_my_receipes', user_id=0) }}">谁的菜谱{% if page_index==2 %}<span class="sr-only">(current)</span>{% endif %}</a>
+      </li>
+      <li class="nav-item{% if page_index==3 %} active{% endif %}">
+        <a class="nav-link" href="{{ url_for('admin_fridges', user_id=0) }}">谁的冰箱{% if page_index==3 %}<span class="sr-only">(current)</span>{% endif %}</a>
+      </li>
+      <li class="nav-item{% if page_index==4 %} active{% endif %}">
+        <a class="nav-link" href="{{ url_for('admin_statistics') }}">统计数据{% if page_index==4 %}<span class="sr-only">(current)</span>{% endif %}</a>
+      </li>
+      <li class="nav-item{% if page_index==5 %} active{% endif %}">
+        <a class="nav-link" href="{{ url_for('admin_user_list') }}">用户列表{% if page_index==5 %}<span class="sr-only">(current)</span>{% endif %}</a>
+      </li>
+  </div>
+</nav>

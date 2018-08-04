@@ -15,7 +15,11 @@
   </head>
   <body>
     {% block navbar %}
-        {% include 'navbar.html' %}
+        {% if user_id==0 %}
+            {% include 'admin_navbar.html' %}
+        {% else %}
+            {% include 'navbar.html' %}
+        {% endif %}
     {% endblock %}
 
 	<main role="main" class="container">

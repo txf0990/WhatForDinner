@@ -26,10 +26,18 @@ def login():
         password = request.form['password']
         database = Database(filename)
         user_id = database.verifyPassword(user_name, password)
-        if user_id != -1:                # 判断用户名密码是否匹配
+        status = 0
+        if user_id == -1:       # user does not exist
+            status = -1
+        elif user_id == -2:     # mismatch password
+            status = -2
+        elif user_id == 0:
+            session['user_id'] = user_id
+            return redirect(url_for('admin'))
+        else:                # 判断用户名密码是否匹配
             session['user_id'] = user_id
             return redirect(url_for('result'))
-    return redirect(url_for('index'))
+    return render_template('login.html', status=status)
     
 @app.route('/logout')
 def logout():
@@ -54,7 +62,7 @@ def receipes():
     if 'user_id' in session:
         database = Database(filename)
         receipes = database.deliverReceipe()
-        return render_template('receipes.html', receipes=receipes)
+        return render_template('receipes.html', user_id=session['user_id'], receipes=receipes)
     return render_template('login.html')
 
 @app.route('/myreceipes')
@@ -63,7 +71,7 @@ def my_receipes():
         user_id = session['user_id']
         database = Database(filename)
         receipes = database.deliverMyReceipe(user_id)
-        return render_template('my_receipes.html', receipes=receipes)
+        return render_template('my_receipes.html', user_id=session['user_id'], receipes=receipes)
     return render_template('login.html')
 
 @app.route('/receipes/insert', methods=['GET', 'POST'])
@@ -120,7 +128,7 @@ def fridges():
         if len(fridges) != 0:
             fridges = fridges[0][1].split(' ')
         # now fridges is a list of stock
-        return render_template('fridges.html', fridges=fridges)
+        return render_template('fridges.html', user_id=session['user_id'], fridges=fridges)
     return render_template('login.html')
 
 @app.route('/fridges/insert', methods=['GET','POST'])
@@ -191,8 +199,142 @@ def result():
             result_list.remove(to_delete)
         # soted_result is a list:
         # [dish_num, dish_name, list(what_i_have), list(material still needed), item number still needed]
-        return render_template('result.html', data=sorted_result)
+        return render_template('result.html', user_id=session['user_id'], data=sorted_result)
     return render_template('login.html')
+
+#######
+# admin
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    if not 'user_id' in session:
+        return redirect(url_for('login'))
+    if session['user_id'] != 0:
+        return "You don't have the access!"
+    return redirect(url_for('receipes'))
+            
+@app.route('/admin/myreceipes', methods=['GET', 'POST'])
+def admin_my_receipes():
+    if not 'user_id' in session:
+        return redirect(url_for('login'))
+    if session['user_id'] != 0:
+        return "You don't have the access!"
+    user_id = request.args['user_id']
+    receipes = []
+    if request.method == 'POST':
+        user_id = request.form['next_user_id']
+    database = Database(filename)
+    receipes = database.deliverMyReceipe(user_id)
+    return render_template('admin_my_receipes.html', user_id=user_id, receipes=receipes)
+
+@app.route('/admin/myreceipes/insert', methods=['GET', 'POST'])
+def admin_my_receipes_insert():
+    if not 'user_id' in session:
+        return redirect(url_for('login'))
+    if session['user_id'] != 0:
+        return "You don't have the access!"
+    user_id = 0
+    if request.method == 'POST':
+        user_id = request.form['current_user_id']
+        database = Database(filename)
+        content = request.form['content']
+        if content == '':
+            return redirect(url_for('admin_my_receipes', user_id=user_id))
+        content = Unicode_to_UTF8(content)
+        content = content.split(' ')
+        dish_name = content[0]
+        content.remove(dish_name)
+        components = content
+        database.insertMyReceipeEntry(user_id, dish_name, components)
+    return redirect(url_for('admin_my_receipes',user_id=user_id))
+
+@app.route('/admin/myreceipes/delete', methods=['GET', 'POST'])
+def admin_my_receipes_delete():
+    if not 'user_id' in session:
+        return redirect(url_for('login'))
+    if session['user_id'] != 0:
+        return "You don't have the access!"
+    user_id = request.args['current_user_id']
+    database = Database(filename)
+    database.deleteMyReceipeEntry(user_id, request.args['id'])
+    return redirect(url_for('admin_my_receipes', user_id=user_id))
+
+@app.route('/admin/fridges', methods=['GET','POST'])
+def admin_fridges():
+    if not 'user_id' in session:
+        return redirect(url_for('login'))
+    if session['user_id'] != 0:
+        return "You don't have the access!"
+    user_id = request.args['user_id']
+    if request.method == 'POST':
+        user_id = request.form['next_user_id']
+    database = Database(filename)
+    fridges = database.deliverFridge(user_id)
+    if len(fridges) != 0:
+        fridges = fridges[0][1].split(' ')
+    # now fridges is a list of stock
+    return render_template('admin_fridges.html', user_id=user_id, fridges=fridges)
+
+@app.route('/admin/fridges/insert', methods=['GET','POST'])
+def admin_fridges_insert():
+    if not 'user_id' in session:
+        return redirect(url_for('login'))
+    if session['user_id'] != 0:
+        return "You don't have the access!"
+    user_id = 0
+    if request.method == 'POST':
+        user_id = request.form['current_user_id']
+        database = Database(filename)
+# user_fridge is a list of what is already in fridge
+        add_stock_text = request.form['content']
+        if add_stock_text == '':
+            return redirect(url_for('admin_fridges', user_id=user_id))
+        add_stock_text = add_stock_text.split(' ')
+        database.insertToFridge(user_id, add_stock_text)
+    return redirect(url_for('admin_fridges', user_id=user_id))
+
+@app.route('/admin/fridges/delete', methods=['GET','POST'])
+def admin_fridges_delete():
+    if not 'user_id' in session:
+        return redirect(url_for('login'))
+    if session['user_id'] != 0:
+        return "You don't have the access!"
+    user_id = request.args['current_user_id']
+    database = Database(filename)
+    #user_id = 1
+    material = request.args['name']
+    #print 'calling deleteFromFridge({},{})'.format(user_id, [material])
+    database.deleteFromFridge(user_id, [material])
+    return redirect(url_for('admin_fridges', user_id=user_id))
+
+@app.route('/admin/statistics')
+def admin_statistics():
+    if not 'user_id' in session:
+        return redirect(url_for('login'))
+    if session['user_id'] != 0:
+        return "You don't have the access!"
+    database = Database(filename)
+    conn = sqlite3.connect(filename)
+    c = conn.cursor()
+    num_receipes = c.execute('select count(*) from receipes')
+    num_receipes = num_receipes.fetchone()[0]
+    num_users = c.execute('select count(*) from users')
+    num_users = num_users.fetchone()[0]
+    return render_template('admin_statistics.html', num_users=num_users, num_receipes=num_receipes)
+
+@app.route('/admin/userlist')
+def admin_user_list():
+    if not 'user_id' in session:
+        return redirect(url_for('login'))
+    if session['user_id'] != 0:
+        return "You don't have the access!"
+    database = Database(filename)
+    conn = sqlite3.connect(filename)
+    c = conn.cursor()
+    users = c.execute('SELECT * FROM users')    # users is a cursor object
+    users = list(users)     # users is a list of tuple, like [(0,'admin','admin@gmail.com'),(1,'111','111@gmail.com'),(2,'222','222@gmail.com')]
+    return render_template('admin_user_list.html', users=users)
+
+
 
 app.secret_key = '\ng\xaa!\x01\xd8\xd2%Ftz}m\xf0\xa1\xe6\xdf\xe8I\x8a\xb8\x80\xb6\x90'
 

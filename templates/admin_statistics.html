@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}统计数据{% endblock %}
+{% block navbar %}
+    {% set page_index = 4 %}
+    {% include "admin_navbar.html" %}
+{% endblock %}
+{% block content %}
+<h5>Statistics</h5>
+<br>
+		<table class="table table-striped">
+			<tbody>
+				<tr class="d-flex">
+                    <td class="col-3">Number of users: </td>
+                    <td class="col-8">{{ num_users }} </td>
+				</tr>
+				<tr class="d-flex">
+                    <td class="col-3">Number of receipes: </td>
+                    <td class="col-8">{{ num_receipes }} </td>
+				</tr>
+			</tbody>
+		</table>
+{% endblock %}

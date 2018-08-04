@@ -4,13 +4,15 @@ import sqlite3
 filename = 'test.db'
 conn = sqlite3.connect(filename)
 c = conn.cursor()
-c.execute("CREATE TABLE users (user_id integer PRIMARY KEY, user_name text UNIQUE, password text)")
-c.execute("INSERT INTO users VALUES(1,'hello','123321')")
-c.execute("INSERT INTO users VALUES(2,'world','456654')")
-c.execute("INSERT INTO users VALUES(3,'happy','789987')")
-c.execute("INSERT INTO users VALUES(4,'day','000000')")
+c.execute("CREATE TABLE users (user_id integer PRIMARY KEY, user_name text UNIQUE, user_email text UNIQUE, password text)")
+c.execute("INSERT INTO users VALUES(0,'admin','admin@gmail.com','qqq')")
+c.execute("INSERT INTO users VALUES(1,'111','111@gmail.com','111')")
+c.execute("INSERT INTO users VALUES(2,'222','222@gmail.com','222')")
+c.execute("INSERT INTO users VALUES(3,'333','333@gmail.com','333')")
+c.execute("INSERT INTO users VALUES(4,'444','444@gmail.com','444')")
 
 c.execute("CREATE TABLE fridges (user_id integer PRIMARY KEY AUTOINCREMENT, stock text)")
+c.execute("insert into fridges values(0,'')")
 c.execute("insert into fridges values(1,'西红柿 黄瓜 牛肉 糖')")
 c.execute("insert into fridges values(2,'八角 猪肉 茄子')")
 c.execute("insert into fridges values(3,'牛肉 菠菜 糖 西红柿')")
@@ -38,6 +40,7 @@ c.execute("insert into receipes values(5,'西红柿炒鸡蛋','西红柿 鸡蛋 
 c.execute("insert into receipes values(6,'牛肉丸子菠菜汤','牛肉 菠菜 黑胡椒')")
 
 c.execute("CREATE TABLE user_receipes (user_id integer UNIQUE, user_receipes text)")
+c.execute("insert into user_receipes values(0,'')")
 c.execute("insert into user_receipes values(1,'1 2 3')")
 c.execute("insert into user_receipes values(2,'2 3 4')")
 c.execute("insert into user_receipes values(3,'3 4 5')")
