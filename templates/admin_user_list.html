@@ -12,13 +12,15 @@
 				<tr class="d-flex">
                     <td class="col-2">user id</td>
                     <td class="col-3">user name</td>
-                    <td class="col-7">user email</td>
+                    <td class="col-5">user email</td>
+                    <td class="col-2">user group</td>
 				</tr>
 				{% for user in users %}
 				<tr class="d-flex">
                     <td class="col-2">{{ user[0] }}</td>
                     <td class="col-3">{{ user[1] }}</td>
-                    <td class="col-7">{{ user[2] }}</td>
+                    <td class="col-5">{{ user[2] }}</td>
+                    <td class="col-2">{{ user[4] }}</td>
 				</tr>
 				{% endfor %}
 			</tbody>

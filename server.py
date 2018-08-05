@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 from flask import Flask, render_template, request, redirect, url_for, session
+import re
 import sqlite3
 from classes import Database
 
@@ -10,6 +11,10 @@ def UTF8_to_Unicode(s):
     return s.decode('utf8')
 def Unicode_to_UTF8(s):
     return s.encode('utf8')
+def ifValidEmail(email):
+    if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", email) != None:
+        return True
+    return False
 
 app = Flask(__name__)
 
@@ -17,16 +22,16 @@ app = Flask(__name__)
 def index():
     if 'user_id' in session:
         return redirect(url_for('debug'))
-    return render_template('login.html')
+    return render_template('login_name.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+@app.route('/loginname', methods=['GET', 'POST'])
+def login_name():
+    status = 0
     if request.method == 'POST':
         user_name = request.form['user_name']
         password = request.form['password']
         database = Database(filename)
-        user_id = database.verifyPassword(user_name, password)
-        status = 0
+        user_id = database.verifyPassword_user_name(user_name, password)
         if user_id == -1:       # user does not exist
             status = -1
         elif user_id == -2:     # mismatch password
@@ -37,17 +42,70 @@ def login():
         else:                # 判断用户名密码是否匹配
             session['user_id'] = user_id
             return redirect(url_for('result'))
-    return render_template('login.html', status=status)
+    return render_template('login_name.html', status=status)
     
+@app.route('/loginemail', methods=['GET', 'POST'])
+def login_email():
+    status = 0
+    if request.method == 'POST':
+        user_email = request.form['user_email']
+        password = request.form['password']
+        database = Database(filename)
+        user_id = database.verifyPassword_user_email(user_email, password)
+        if user_id == -1:       # user does not exist
+            status = -1
+        elif user_id == -2:     # mismatch password
+            status = -2
+        elif user_id == 0:
+            session['user_id'] = user_id
+            return redirect(url_for('admin'))
+        else:                # 判断用户名密码是否匹配
+            session['user_id'] = user_id
+            return redirect(url_for('result'))
+    return render_template('login_email.html', status=status)
+
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('index'))
 
+@app.route('/register', methods=['GET','POST'])
+def register():
+    status = 0
+    if request.method == 'POST':
+        user_name = request.form['user_name']
+        if not user_name.isalnum():
+            return render_template('register.html', status=-4)
+        user_email = request.form['user_email']
+        # 检查是否合法邮件地址
+        if not ifValidEmail(user_email):
+            return render_template('register.html', status=-5)
+
+        password = request.form['password']
+        database = Database(filename)
+        status = database.insertUser(user_name, user_email, password)
+        if status != 0 and status != -1 and status != -2 and status != -3 and status != -4 and status != -5:
+            session['user_id'] = status
+            return redirect(url_for('result'))
+
+    return render_template('register.html', status=status)
+
+@app.route('/verify/<verification_code>')
+def verify(verification_code):
+    database = Database(filename)
+    status = database.verifyEmail(verification_code)
+    if status == -1:
+        return '错误的激活链接'
+    else:
+        session['user_id'] = status
+        return redirect(url_for('result'))
+
 @app.route('/debug')
 def debug():
     user_id = session['user_id']
-    return render_template('debug.html', user_id=user_id)
+    database = Database(filename)
+    user_group = database.findUserGroup(user_id)
+    return render_template('debug.html', user_id=user_id, user_group=user_group)
 
 @app.route('/hello')
 def welcome():
@@ -63,16 +121,19 @@ def receipes():
         database = Database(filename)
         receipes = database.deliverReceipe()
         return render_template('receipes.html', user_id=session['user_id'], receipes=receipes)
-    return render_template('login.html')
+    return render_template('login_name.html')
 
 @app.route('/myreceipes')
 def my_receipes():
     if 'user_id' in session:
         user_id = session['user_id']
         database = Database(filename)
+        user_group = database.findUserGroup(user_id)
+        if user_group == 2:
+            return "您必须先验证邮箱才能使用功能"
         receipes = database.deliverMyReceipe(user_id)
         return render_template('my_receipes.html', user_id=session['user_id'], receipes=receipes)
-    return render_template('login.html')
+    return render_template('login_name.html')
 
 @app.route('/receipes/insert', methods=['GET', 'POST'])
 def receipes_insert():
@@ -105,6 +166,14 @@ def my_receipes_insert():
         database.insertMyReceipeEntry(user_id, dish_name, components)
     return redirect(url_for('my_receipes'))
 
+@app.route('/myreceipes/copy', methods=['GET', 'POST'])
+def my_receipes_copy():
+    database = Database(filename)
+    user_id = session['user_id']
+    dish_id = request.args['id']
+    database.copyToMyReceipe(user_id, dish_id)
+    return redirect(url_for('my_receipes'))
+
 @app.route('/receipes/delete', methods=['GET', 'POST'])
 def receipes_delete():
     database = Database(filename)
@@ -123,13 +192,16 @@ def fridges():
     if 'user_id' in session:
         database = Database(filename)
         user_id = session['user_id']
+        user_group = database.findUserGroup(user_id)
+        if user_group == 2:
+            return "您必须先验证邮箱才能使用功能"
         #user_id = 1
         fridges = database.deliverFridge(user_id)
         if len(fridges) != 0:
             fridges = fridges[0][1].split(' ')
         # now fridges is a list of stock
         return render_template('fridges.html', user_id=session['user_id'], fridges=fridges)
-    return render_template('login.html')
+    return render_template('login_name.html')
 
 @app.route('/fridges/insert', methods=['GET','POST'])
 def fridges_insert():
@@ -200,14 +272,14 @@ def result():
         # soted_result is a list:
         # [dish_num, dish_name, list(what_i_have), list(material still needed), item number still needed]
         return render_template('result.html', user_id=session['user_id'], data=sorted_result)
-    return render_template('login.html')
+    return render_template('login_name.html')
 
 #######
 # admin
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     if not 'user_id' in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
     return redirect(url_for('receipes'))
@@ -215,7 +287,7 @@ def admin():
 @app.route('/admin/myreceipes', methods=['GET', 'POST'])
 def admin_my_receipes():
     if not 'user_id' in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
     user_id = request.args['user_id']
@@ -229,7 +301,7 @@ def admin_my_receipes():
 @app.route('/admin/myreceipes/insert', methods=['GET', 'POST'])
 def admin_my_receipes_insert():
     if not 'user_id' in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
     user_id = 0
@@ -250,7 +322,7 @@ def admin_my_receipes_insert():
 @app.route('/admin/myreceipes/delete', methods=['GET', 'POST'])
 def admin_my_receipes_delete():
     if not 'user_id' in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
     user_id = request.args['current_user_id']
@@ -261,7 +333,7 @@ def admin_my_receipes_delete():
 @app.route('/admin/fridges', methods=['GET','POST'])
 def admin_fridges():
     if not 'user_id' in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
     user_id = request.args['user_id']
@@ -277,7 +349,7 @@ def admin_fridges():
 @app.route('/admin/fridges/insert', methods=['GET','POST'])
 def admin_fridges_insert():
     if not 'user_id' in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
     user_id = 0
@@ -295,7 +367,7 @@ def admin_fridges_insert():
 @app.route('/admin/fridges/delete', methods=['GET','POST'])
 def admin_fridges_delete():
     if not 'user_id' in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
     user_id = request.args['current_user_id']
@@ -309,7 +381,7 @@ def admin_fridges_delete():
 @app.route('/admin/statistics')
 def admin_statistics():
     if not 'user_id' in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
     database = Database(filename)
@@ -324,7 +396,7 @@ def admin_statistics():
 @app.route('/admin/userlist')
 def admin_user_list():
     if not 'user_id' in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
     database = Database(filename)
@@ -335,8 +407,8 @@ def admin_user_list():
     return render_template('admin_user_list.html', users=users)
 
 
-
 app.secret_key = '\ng\xaa!\x01\xd8\xd2%Ftz}m\xf0\xa1\xe6\xdf\xe8I\x8a\xb8\x80\xb6\x90'
+
 
 
 if __name__ == '__main__':

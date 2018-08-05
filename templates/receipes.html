@@ -20,6 +20,11 @@
                     {% endif %}
 					<td class="col-2">{{ receipe[1] }}</td>
 					<td class="col-8">{{ receipe[2] }}</td>
+                    {% if user_id!=0 %}
+					<td class="col-1"><a href="{{ url_for('my_receipes_copy', id=receipe[0]) }}">
+                            COPY
+					</a></td>
+                    {% endif %}
                     {% if user_id==0 %}
 					<td class="col-1"><a href="{{ url_for('receipes_delete', id=receipe[0]) }}">
 						<button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>

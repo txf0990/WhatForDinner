@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}登录{% endblock %}
+{% block navbar %}
+    {% include "navbar_unregistered.html" %}
+{% endblock %}
+{% block content %}
+		<h5>用户登录</h5>
+        <br>
+        <form name="login_name" action="{{ url_for('login_name') }}" method="POST">
+		  <div class="form-group col-md-3">
+              <label for="login_name">用户名</label> <a href="/loginemail"><font size="2">-->使用电子邮箱登录</font></a>
+			<input type="text" class="form-control" name="user_name" placeholder="请输入用户名">
+		  </div>
+		  <div class="form-group col-md-3">
+			<label for="login_name">密码</label>
+			<input type="password" class="form-control" name="password" placeholder="请输入密码">
+		  </div>
+          <br>
+		  <button type="submit" class="btn btn-primary">登录</button>
+		</form>
+        <br>
+        <font size="2">还没有账号？<a href="/register">立即注册</a></font>
+        <br>
+        {% if status==-1 %}
+            <div class="alert alert-primary col-md-3" role="alert">
+                用户不存在
+            </div>
+        {% endif %}
+        {% if status==-2 %}
+            <div class="alert alert-primary col-md-3" role="alert">
+                用户名密码不匹配
+            </div>
+        {% endif %}
+<br>
+<br>
+<br>
+{% endblock %}

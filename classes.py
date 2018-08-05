@@ -2,6 +2,9 @@
 # -*- encoding: utf-8 -*-
 import sqlite3
 
+import string
+import random
+import re
 class Database(object):
     'This is the database'
     def __init__(self, filename):
@@ -12,11 +15,50 @@ class Database(object):
         self.c.execute("CREATE TABLE IF NOT EXISTS fridges (user_id integer PRIMARY KEY AUTOINCREMENT, stock text)")
         self.c.execute("CREATE TABLE IF NOT EXISTS users (user_id integer PRIMARY KEY AUTOINCREMENT, user_name text UNIQUE, password text)")
         self.c.execute("CREATE TABLE IF NOT EXISTS user_receipes (user_id integer, user_receipes text)")
+        self.c.execute("CREATE TABLE IF NOT EXISTS user_verify (verification_code text PRIMARY KEY, user_id integer UNIQUE)")
         self.conn.commit()
 
-    '''def insertUser(self):
-        self.c.execute("INSERT INTO fridges (stock) Values(?)", ('',))
-        self.conn.commit()'''
+    def insertUser(self, user_name, user_email, password):
+        cursor_object1 = self.c.execute('SELECT * FROM users WHERE user_name=?', (user_name,))
+        list_cursor_object1 = list(cursor_object1)
+        cursor_object2 = self.c.execute('SELECT * FROM users WHERE user_email=?', (user_email,))
+        list_cursor_object2 = list(cursor_object2)
+        status = 0
+        if len(list_cursor_object1) != 0 and len(list_cursor_object2) != 0:
+            return -1  # existed user
+        elif len(list_cursor_object1) != 0 and len(list_cursor_object2) == 0:
+            return -2  # existed username
+        elif len(list_cursor_object1) == 0 and len(list_cursor_object2) != 0:
+            return -3  # existed email
+        else:
+            self.c.execute('INSERT INTO users(user_name,user_email,password,user_group) Values(?,?,?,?)',(user_name, user_email,password,2,))  #  user_group=1 是已经验证邮箱的用户。user_group=2是刚注册还未验证邮箱的用户
+            cursor_object = self.c.execute('SELECT * from users WHERE user_name=?',(user_name,))
+            list_cursor_object = list(cursor_object)    # it is a list of tuple
+            user_id = list_cursor_object[0][0]
+            self.c.execute("INSERT INTO user_receipes Values(?,'1')",(user_id,))
+            self.c.execute("INSERT INTO fridges Values(?,'')",(user_id,))
+            verification_code = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(30))
+            self.c.execute('INSERT INTO user_verify Values(?,?)', (verification_code, user_id,))
+            print verification_code
+            self.conn.commit()
+            return user_id
+    
+    def verifyEmail(self, verification_code):
+        cursor_object = self.c.execute('SELECT * from user_verify WHERE verification_code=?',(verification_code,))
+        list_cursor_object = list(cursor_object)
+        if len(list_cursor_object) == 0:
+            return -1       # the verification code is a fake one. do nothing and give an alert.
+        user_id = list_cursor_object[0][1]
+        self.c.execute('UPDATE users SET user_group=1 WHERE user_id=?',(user_id,))
+        self.c.execute('DELETE FROM user_verify WHERE verification_code=?',(verification_code,))
+        self.conn.commit()
+        return user_id 
+
+    def findUserGroup(self, user_id):
+        cursor_object = self.c.execute('SELECT user_group FROM users WHERE user_id=?', (user_id,))
+        list_cursor_object = list(cursor_object)
+        group = list_cursor_object[0][0]
+        return group
 
     def insertReceipeEntry(self, dish_name, materials):
         materials_text = ""
@@ -56,6 +98,17 @@ class Database(object):
             self.c.execute("UPDATE user_receipes SET user_receipes=? WHERE user_id=?", (receipe_list_text, user_id))    
             self.conn.commit()
     
+    def copyToMyReceipe(self, user_id, dish_id):
+        cursor_object = self.c.execute('SELECT * FROM user_receipes WHERE user_id=?',(user_id,))
+        list_cursor_object = list(cursor_object)
+        receipe_list = list_cursor_object[0][1].split(' ')
+        if not dish_id in receipe_list:
+            receipe_list.append(dish_id)
+            receipe_text = ' '.join(receipe_list)
+            self.c.execute('UPDATE user_receipes SET user_receipes=? WHERE user_id=?',(receipe_text, user_id,))
+            self.conn.commit()
+
+
     def deleteMyReceipeEntry(self, user_id, dish_id):
         cursor_object = self.c.execute("SELECT * FROM user_receipes WHERE user_id=?",(user_id,))
         list_cursor_object = list(cursor_object)        # [(1,'1 2 3')]
@@ -130,8 +183,17 @@ class Database(object):
         #        list_cursor_object)
         return list_cursor_object
 
-    def verifyPassword(self, user_name, password):
+    def verifyPassword_user_name(self, user_name, password):
         cursor_object = self.c.execute("SELECT * FROM users WHERE user_name=?", (user_name,))
+        list_cursor_object = list(cursor_object)
+        if len(list_cursor_object) == 0:   # user does not exist.
+            return -1
+        if (list_cursor_object[0][3] != password):  # password mismatch
+            return -2
+        return list_cursor_object[0][0]         # return the user_id
+
+    def verifyPassword_user_email(self, user_email, password):
+        cursor_object = self.c.execute("SELECT * FROM users WHERE user_email=?", (user_email,))
         list_cursor_object = list(cursor_object)
         if len(list_cursor_object) == 0:   # user does not exist.
             return -1
@@ -143,3 +205,11 @@ def UTF8_to_Unicode(s):
     return s.decode('utf8')
 def Unicode_to_UTF8(s):
     return s.encode('utf8')
+def ifValidUsername(user_name):
+    char_list = list(user_name)
+    if '@' in char_list:
+        return false
+    else:
+        return true
+
+

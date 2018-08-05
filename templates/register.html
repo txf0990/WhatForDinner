@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}注册{% endblock %}
+{% block navbar %}
+    {% include "navbar_unregistered.html" %}
+{% endblock %}
+{% block content %}
+		<h5>新用户注册</h5>
+        <br>
+        <form name="register" action="{{ url_for('register') }}" method="POST">
+            {% if status==-1 %}
+            <div class="alert alert-danger col-md-3" role="alert">
+                  用户已存在
+            </div>
+            {% endif %}
+
+		  <div class="form-group col-md-3">
+              <label for="login_name">用户名</label>
+			<input type="text" class="form-control" name="user_name" placeholder="用户名只包括a-z,A-Z,0-9">
+            {% if status==-4 %}
+            <div class="alert alert-danger" role="alert">
+                  用户名只包含 a-z,A-Z,0-9
+            </div>
+            {% endif %}
+            {% if status==-2 %}
+            <div class="alert alert-danger" role="alert">
+                  用户名已被使用
+            </div>
+            {% endif %}
+		  </div>
+		  <div class="form-group col-md-3">
+              <label for="login_email">电子邮箱地址</label>
+			<input type="text" class="form-control" name="user_email" placeholder="请输入电子邮箱地址">
+            {% if status==-3 %}
+            <div class="alert alert-danger" role="alert">
+                  电子邮箱地址已被使用
+            </div>
+            {% endif %}
+            {% if status==-5 %}
+            <div class="alert alert-danger" role="alert">
+                  非法的电子邮箱地址
+            </div>
+            {% endif %}
+		  </div>
+		  <div class="form-group col-md-3">
+			<label for="login_name">密码</label>
+			<input type="password" class="form-control" name="password" placeholder="请输入密码">
+		  </div>
+          <br>
+		  <button type="submit" class="btn btn-primary">注册</button>
+		</form>
+
+        <br>
+<br>
+<br>
+<br>
+cheat:<br>
+admin   qqq<br>
+111     111<br>
+222     222<br>
+333     333<br>
+444     444<br>
+{% endblock %}

@@ -4,12 +4,12 @@ import sqlite3
 filename = 'test.db'
 conn = sqlite3.connect(filename)
 c = conn.cursor()
-c.execute("CREATE TABLE users (user_id integer PRIMARY KEY, user_name text UNIQUE, user_email text UNIQUE, password text)")
-c.execute("INSERT INTO users VALUES(0,'admin','admin@gmail.com','qqq')")
-c.execute("INSERT INTO users VALUES(1,'111','111@gmail.com','111')")
-c.execute("INSERT INTO users VALUES(2,'222','222@gmail.com','222')")
-c.execute("INSERT INTO users VALUES(3,'333','333@gmail.com','333')")
-c.execute("INSERT INTO users VALUES(4,'444','444@gmail.com','444')")
+c.execute("CREATE TABLE users (user_id integer PRIMARY KEY, user_name text UNIQUE, user_email text UNIQUE, password text, user_group integer)")
+c.execute("INSERT INTO users VALUES(0,'admin','admin@gmail.com','qqq', 0)")
+c.execute("INSERT INTO users VALUES(1,'111','111@gmail.com','111', 1)")
+c.execute("INSERT INTO users VALUES(2,'222','222@gmail.com','222', 1)")
+c.execute("INSERT INTO users VALUES(3,'333','333@gmail.com','333', 2)")
+c.execute("INSERT INTO users VALUES(4,'444','444@gmail.com','444', 2)")
 
 c.execute("CREATE TABLE fridges (user_id integer PRIMARY KEY AUTOINCREMENT, stock text)")
 c.execute("insert into fridges values(0,'')")
@@ -45,5 +45,7 @@ c.execute("insert into user_receipes values(1,'1 2 3')")
 c.execute("insert into user_receipes values(2,'2 3 4')")
 c.execute("insert into user_receipes values(3,'3 4 5')")
 c.execute("insert into user_receipes values(4,'4 5 6')")
+
+c.execute("CREATE TABLE user_verify (verification_code text PRIMARY KEY, user_id integer UNIQUE)")
 
 conn.commit()
