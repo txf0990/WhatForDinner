@@ -5,7 +5,7 @@
     {% include "navbar.html" %}
 {% endblock %}
 {% block content %}
-		<h5>My Receipes</h5>
+		<h5>我的菜谱</h5>
 
 		<table class="table table-striped">
 			<tbody>
@@ -23,4 +23,7 @@
         <form name="Message" action="{{ url_for('my_receipes_insert') }}" method="POST">
             插入菜谱: <input type="text" name="content"> <input type="submit" value="提交">
         </form>
+        <br>
+        <br>
+        <a href="{{url_for('my_receipes_clear')}}">清空我的菜谱</a>
 {% endblock %}

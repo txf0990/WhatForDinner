@@ -5,7 +5,7 @@
     {% include "navbar.html" %}
 {% endblock %}
 {% block content %}
-		<h5>My Fridge</h5>
+		<h5>我的冰箱</h5>
 		<table class="table table-striped">
 			<tbody>
 				{% for material in fridges %}
@@ -24,4 +24,7 @@
             插入冰箱: <input type="text" name="content">
             <input type="submit" value="插入">
         </form>
+        <br>
+        <br>
+        <a href="{{url_for('fridges_clear')}}">清空我的冰箱</a>
 {% endblock %}

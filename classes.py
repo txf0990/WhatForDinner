@@ -31,7 +31,7 @@ class Database(object):
         elif len(list_cursor_object1) == 0 and len(list_cursor_object2) != 0:
             return -3  # existed email
         else:
-            self.c.execute('INSERT INTO users(user_name,user_email,password,user_group) Values(?,?,?,?)',(user_name, user_email,password,2,))  #  user_group=1 是已经验证邮箱的用户。user_group=2是刚注册还未验证邮箱的用户
+            self.c.execute('INSERT INTO users(user_name,user_email,password,user_group) Values(?,?,?,?)',(user_name, user_email,password,1,))  #  user_group=1 是已经验证邮箱的用户。user_group=2是刚注册还未验证邮箱的用户
             cursor_object = self.c.execute('SELECT * from users WHERE user_name=?',(user_name,))
             list_cursor_object = list(cursor_object)    # it is a list of tuple
             user_id = list_cursor_object[0][0]
@@ -39,7 +39,7 @@ class Database(object):
             self.c.execute("INSERT INTO fridges Values(?,'')",(user_id,))
             verification_code = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(30))
             self.c.execute('INSERT INTO user_verify Values(?,?)', (verification_code, user_id,))
-            print verification_code
+            # print verification_code
             self.conn.commit()
             return user_id
     
@@ -60,17 +60,45 @@ class Database(object):
         group = list_cursor_object[0][0]
         return group
 
+    def findUserName(self, user_id):
+        cursor_object = self.c.execute('SELECT user_name FROM users WHERE user_id=?', (user_id,))
+        list_cursor_object = list(cursor_object)
+        name = list_cursor_object[0][0]
+        return name
+    
+    def findUserProfile(self, user_id):
+        cursor_object = self.c.execute('SELECT * FROM users WHERE user_id=?', (user_id,))
+        list_cursor_object = list(cursor_object)
+        result = []
+        result.append(list_cursor_object[0][1])
+        result.append(list_cursor_object[0][2])
+        cursor_object = self.c.execute('SELECT * FROM user_receipes WHERE user_id=?', (user_id,))
+        list_cursor_object = list(cursor_object)
+        result.append(len(list_cursor_object[0][1].split(' ')))
+        return result        # user_name, user_email, receipe number.
+
     def insertReceipeEntry(self, dish_name, materials):
+        materials.sort()
         materials_text = ""
         for item in materials:
             self.c.execute("INSERT INTO materials (material_name) SELECT ? WHERE NOT EXISTS(SELECT 1 FROM materials WHERE material_name=?)",(UTF8_to_Unicode(item), UTF8_to_Unicode(item)))
             materials_text = materials_text + item + " "
         materials_text = materials_text[:-1]
-        self.c.execute("INSERT INTO receipes (dish_name, components) Values(?,?)", (UTF8_to_Unicode(dish_name), UTF8_to_Unicode(materials_text)))
-        cursor_object = self.c.execute("SELECT * FROM receipes WHERE dish_id=last_insert_rowid()");
+        # first, check if this receipe already exists.
+        cursor_object = self.c.execute("SELECT * FROM receipes WHERE components=?",(UTF8_to_Unicode(materials_text),))
         list_cursor_object = list(cursor_object)
-        self.conn.commit()
-        return list_cursor_object[0][0] # return a int.
+        if len(list_cursor_object) != 0:
+            for item in list_cursor_object:
+                if item[1] == UTF8_to_Unicode(dish_name) and item[2] == UTF8_to_Unicode(materials_text):
+                    self.conn.commit()
+                    return item[0]
+        else:
+            self.c.execute("INSERT INTO receipes (dish_name, components) Values(?,?)", (UTF8_to_Unicode(dish_name), UTF8_to_Unicode(materials_text)))
+            cursor_object = self.c.execute("SELECT * FROM receipes WHERE dish_id=last_insert_rowid()");
+            list_cursor_object = list(cursor_object)
+            self.conn.commit()
+            return list_cursor_object[0][0] # return a int.
+        
             
     def deleteReceipeEntry(self, dish_id):
         self.c.execute("DELETE FROM receipes WHERE dish_id=?",(dish_id,))
@@ -86,6 +114,7 @@ class Database(object):
     #  联合查询
     def insertMyReceipeEntry(self, user_id, dish_name, materials):
         last_insert_id = self.insertReceipeEntry(dish_name, materials)
+        print last_insert_id
         cursor_object = self.c.execute("SELECT * FROM user_receipes WHERE user_id=?",(user_id,))
         list_cursor_object = list(cursor_object)        # [(1,'1 2 3')]
         receipe_list = []
@@ -200,6 +229,15 @@ class Database(object):
         if (list_cursor_object[0][3] != password):  # password mismatch
             return -2
         return list_cursor_object[0][0]         # return the user_id
+    
+    def clearReceipe(self, user_id):
+        self.c.execute("UPDATE user_receipes SET user_receipes='' WHERE user_id=?",(user_id,))
+        self.conn.commit()
+
+    def clearFridge(self, user_id):
+        self.c.execute("UPDATE fridges SET stock='' WHERE user_id=?",(user_id,))
+        self.conn.commit()
+
 
 def UTF8_to_Unicode(s):
     return s.decode('utf8')

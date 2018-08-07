@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block navbar %}
+    {% if user_id==0 %}
+        {% include "admin_navbar.html" %}
+    {% else %}
+        {% include "navbar.html" %}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <h5>Profile</h5>
+    用户名: {{ user_profile[0] }} <br>
+    电子邮箱: {{ user_profile[1] }} <br>
+    菜谱数量: {{ user_profile[2] }} <br>
+{% endblock %}

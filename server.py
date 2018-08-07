@@ -21,8 +21,10 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     if 'user_id' in session:
-        return redirect(url_for('debug'))
-    return render_template('login_name.html')
+        return redirect(url_for('receipes'))
+    else:
+        session['user_id'] = 9988
+    return redirect(url_for('receipes'))
 
 @app.route('/loginname', methods=['GET', 'POST'])
 def login_name():
@@ -105,7 +107,16 @@ def debug():
     user_id = session['user_id']
     database = Database(filename)
     user_group = database.findUserGroup(user_id)
-    return render_template('debug.html', user_id=user_id, user_group=user_group)
+    user_name = database.findUserName(user_id)
+    return render_template('debug.html', user_id=user_id, user_group=user_group, user_name=user_name)
+
+@app.route('/profile')
+def profile():
+    user_id = session['user_id']
+    database = Database(filename)
+    user_profile = database.findUserProfile(user_id)
+    user_name = database.findUserName(user_id)
+    return render_template('profile.html', user_id=user_id, user_profile=user_profile, user_name=user_name)
 
 @app.route('/hello')
 def welcome():
@@ -118,9 +129,11 @@ def hello_sb(username):
 @app.route('/receipes')
 def receipes():
     if 'user_id' in session:
+        user_id = session['user_id']
         database = Database(filename)
+        user_name = database.findUserName(user_id)
         receipes = database.deliverReceipe()
-        return render_template('receipes.html', user_id=session['user_id'], receipes=receipes)
+        return render_template('receipes.html', user_id=session['user_id'], receipes=receipes, user_name=user_name)
     return render_template('login_name.html')
 
 @app.route('/myreceipes')
@@ -128,11 +141,12 @@ def my_receipes():
     if 'user_id' in session:
         user_id = session['user_id']
         database = Database(filename)
+        user_name = database.findUserName(user_id)
         user_group = database.findUserGroup(user_id)
         if user_group == 2:
             return "您必须先验证邮箱才能使用功能"
         receipes = database.deliverMyReceipe(user_id)
-        return render_template('my_receipes.html', user_id=session['user_id'], receipes=receipes)
+        return render_template('my_receipes.html', user_id=session['user_id'], receipes=receipes, user_name=user_name)
     return render_template('login_name.html')
 
 @app.route('/receipes/insert', methods=['GET', 'POST'])
@@ -172,7 +186,7 @@ def my_receipes_copy():
     user_id = session['user_id']
     dish_id = request.args['id']
     database.copyToMyReceipe(user_id, dish_id)
-    return redirect(url_for('my_receipes'))
+    return redirect(url_for('receipes'))
 
 @app.route('/receipes/delete', methods=['GET', 'POST'])
 def receipes_delete():
@@ -187,11 +201,19 @@ def my_receipes_delete():
     database.deleteMyReceipeEntry(user_id, request.args['id'])
     return redirect(url_for('my_receipes'))
 
+@app.route('/myreceipes/clear')
+def my_receipes_clear():
+    user_id = session['user_id']
+    database = Database(filename)
+    database.clearReceipe(user_id)
+    return redirect(url_for('my_receipes'))
+
 @app.route('/fridges')
 def fridges():
     if 'user_id' in session:
         database = Database(filename)
         user_id = session['user_id']
+        user_name = database.findUserName(user_id)
         user_group = database.findUserGroup(user_id)
         if user_group == 2:
             return "您必须先验证邮箱才能使用功能"
@@ -200,7 +222,7 @@ def fridges():
         if len(fridges) != 0:
             fridges = fridges[0][1].split(' ')
         # now fridges is a list of stock
-        return render_template('fridges.html', user_id=session['user_id'], fridges=fridges)
+        return render_template('fridges.html', user_id=session['user_id'], fridges=fridges, user_name=user_name)
     return render_template('login_name.html')
 
 @app.route('/fridges/insert', methods=['GET','POST'])
@@ -227,11 +249,19 @@ def fridges_delete():
     database.deleteFromFridge(user_id, [material])
     return redirect(url_for('fridges'))
 
+@app.route('/fridges/clear')
+def fridges_clear():
+    user_id = session['user_id']
+    database = Database(filename)
+    database.clearFridge(user_id)
+    return redirect(url_for('fridges'))
+
 @app.route('/result', methods=['GET','POST'])
 def result():
     if 'user_id' in session:
         database = Database(filename)
         user_id = session['user_id']
+        user_name = database.findUserName(user_id)
         #user_id = 1
         receipes = database.deliverMyReceipe(user_id)
         fridge = database.deliverFridge(user_id)
@@ -271,7 +301,7 @@ def result():
             result_list.remove(to_delete)
         # soted_result is a list:
         # [dish_num, dish_name, list(what_i_have), list(material still needed), item number still needed]
-        return render_template('result.html', user_id=session['user_id'], data=sorted_result)
+        return render_template('result.html', user_id=session['user_id'], data=sorted_result, user_name=user_name)
     return render_template('login_name.html')
 
 #######
