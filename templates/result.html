@@ -1,20 +1,20 @@
 {% extends "base.html" %}
-{% block title %}查看结果{% endblock %}
+{% block title %}{% if language=='CHN' %}查看结果{% elif language=='ENG' %}Result{% endif %}{% endblock %}
 {% block navbar %}
     {% set page_index = 4 %}
     {% include "navbar.html" %}
 {% endblock %}
 {% block content %}
 <br>
-		<h5>今晚可供选择的菜：</h5>
+		<h5>{% if language=='CHN' %}今晚可供选择的菜：{% elif language=='ENG' %}Today's options{% endif %}</h5>
         <br>
 		<table class="table table-striped">
 			<tbody>
 				<tr class="d-flex">
-                    <td class="col-2">菜名字</td>
-<!--[dish_num, dish_name, list(what_i_have), list(material still needed), item number still needed]-->
-                    <td class='col-8'>所需食材(缺的用粗体)</td>
-                    <td class="col-2">所缺种类</td>
+                    <td class="col-2"><strong>{% if language=='CHN' %}菜名字{% elif language=='ENG' %}Dish name{% endif %}</strong></td>
+            <!--[dish_num, dish_name, list(what_i_have), list(material still needed), item number still needed]-->
+                    <td class='col-8'><strong>{% if language=='CHN' %}所需食材(缺的用粗体){% elif language=='ENG' %}What you need (materials not in fridge highlighted with bold){% endif %}</strong></td>
+                    <td class="col-2"><strong>{% if language=='CHN' %}所缺种类{% elif language=='ENG' %}#kinds needed{% endif %}</strong></td>
 				</tr>
 				{% for option in data %}
 				<tr class="d-flex">

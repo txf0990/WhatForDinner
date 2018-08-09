@@ -23,13 +23,25 @@ def md5(str):
 
 app = Flask(__name__)
 
+@app.route('/changelanguage/ce')
+def change_language_ce():
+    session['language'] = 'ENG'
+    return redirect(url_for('recipes'))
+
+@app.route('/changelanguage/ec')
+def change_language_ec():
+    session['language'] = 'CHN'
+    return redirect(url_for('recipes'))
+
 @app.route('/')
 def index():
+    if not 'language' in session:
+        session['language'] = 'CHN'
     if 'user_id' in session:
-        return redirect(url_for('receipes'))
+        return redirect(url_for('recipes'))
     else:
         session['user_id'] = 9988
-    return redirect(url_for('receipes'))
+    return redirect(url_for('recipes'))
 
 @app.route('/loginname', methods=['GET', 'POST'])
 def login_name():
@@ -49,7 +61,7 @@ def login_name():
         else:                # 判断用户名密码是否匹配
             session['user_id'] = user_id
             return redirect(url_for('result'))
-    return render_template('login_name.html', status=status, user_id=session['user_id'])
+    return render_template('login_name.html', status=status, user_id=session['user_id'], language=session['language'])
     
 @app.route('/loginemail', methods=['GET', 'POST'])
 def login_email():
@@ -69,7 +81,7 @@ def login_email():
         else:                # 判断用户名密码是否匹配
             session['user_id'] = user_id
             return redirect(url_for('result'))
-    return render_template('login_email.html', status=status)
+    return render_template('login_email.html', status=status, language=session['language'])
 
 @app.route('/logout')
 def logout():
@@ -82,11 +94,11 @@ def register():
     if request.method == 'POST':
         user_name = request.form['user_name']
         if not user_name.isalnum():
-            return render_template('register.html', status=-4)
+            return render_template('register.html', status=-4, language=session['language'], user_name=user_name)
         user_email = request.form['user_email']
         # 检查是否合法邮件地址
         if not ifValidEmail(user_email):
-            return render_template('register.html', status=-5)
+            return render_template('register.html', status=-5, language=session['language'], user_name=user_name)
 
         password = request.form['password']
         database = Database(filename)
@@ -95,7 +107,7 @@ def register():
             session['user_id'] = status
             return redirect(url_for('result'))
 
-    return render_template('register.html', status=status)
+    return render_template('register.html', status=status, language=session['language'], user_name='Guest')
 
 @app.route('/verify/<verification_code>')
 def verify(verification_code):
@@ -113,7 +125,7 @@ def debug():
     database = Database(filename)
     user_group = database.findUserGroup(user_id)
     user_name = database.findUserName(user_id)
-    return render_template('debug.html', user_id=user_id, user_group=user_group, user_name=user_name)
+    return render_template('debug.html', user_id=user_id, user_group=user_group, user_name=user_name, language=session['language'])
 
 @app.route('/profile')
 def profile():
@@ -121,7 +133,7 @@ def profile():
     database = Database(filename)
     user_profile = database.findUserProfile(user_id)
     user_name = database.findUserName(user_id)
-    return render_template('profile.html', user_id=user_id, user_profile=user_profile, user_name=user_name)
+    return render_template('profile.html', user_id=user_id, user_profile=user_profile, user_name=user_name, language=session['language'])
 
 @app.route('/hello')
 def welcome():
@@ -131,18 +143,19 @@ def welcome():
 def hello_sb(username):
     return 'Hello, %s!' % username
 
-@app.route('/receipes')
-def receipes():
+@app.route('/recipes')
+def recipes():
+    print session['language']
     if 'user_id' in session:
         user_id = session['user_id']
         database = Database(filename)
         user_name = database.findUserName(user_id)
-        receipes = database.deliverReceipe()
-        return render_template('receipes.html', user_id=session['user_id'], receipes=receipes, user_name=user_name)
-    return render_template('login_name.html')
+        recipes = database.deliverRecipe()
+        return render_template('recipes.html', user_id=session['user_id'], recipes=recipes, user_name=user_name, language=session['language'])
+    return render_template('login_name.html', language=session['language'])
 
-@app.route('/myreceipes')
-def my_receipes():
+@app.route('/myrecipes')
+def my_recipes():
     if 'user_id' in session:
         user_id = session['user_id']
         database = Database(filename)
@@ -150,68 +163,68 @@ def my_receipes():
         user_group = database.findUserGroup(user_id)
         if user_group == 2:
             return "您必须先验证邮箱才能使用功能"
-        receipes = database.deliverMyReceipe(user_id)
-        return render_template('my_receipes.html', user_id=session['user_id'], receipes=receipes, user_name=user_name)
-    return render_template('login_name.html')
+        recipes = database.deliverMyRecipe(user_id)
+        return render_template('my_recipes.html', user_id=session['user_id'], recipes=recipes, user_name=user_name, language=session['language'])
+    return render_template('login_name.html', language=session['language'])
 
-@app.route('/receipes/insert', methods=['GET', 'POST'])
-def receipes_insert():
+@app.route('/recipes/insert', methods=['GET', 'POST'])
+def recipes_insert():
     database = Database(filename)
     if request.method == 'POST':
         content = request.form['content']
         if content == '':
-            return redirect(url_for('receipes'))
+            return redirect(url_for('recipes'))
         content = Unicode_to_UTF8(content)
         content = content.split(' ')
         dish_name = content[0]
         content.remove(dish_name)
         components = content
-        database.insertReceipeEntry(dish_name, components)
-    return redirect(url_for('receipes'))
+        database.insertRecipeEntry(dish_name, components)
+    return redirect(url_for('recipes'))
 
-@app.route('/myreceipes/insert', methods=['GET', 'POST'])
-def my_receipes_insert():
+@app.route('/myrecipes/insert', methods=['GET', 'POST'])
+def my_recipes_insert():
     database = Database(filename)
     user_id = session['user_id']
     if request.method == 'POST':
         content = request.form['content']
         if content == '':
-            return redirect(url_for('my_receipes'))
+            return redirect(url_for('my_recipes'))
         content = Unicode_to_UTF8(content)
         content = content.split(' ')
         dish_name = content[0]
         content.remove(dish_name)
         components = content
-        database.insertMyReceipeEntry(user_id, dish_name, components)
-    return redirect(url_for('my_receipes'))
+        database.insertMyRecipeEntry(user_id, dish_name, components)
+    return redirect(url_for('my_recipes'))
 
-@app.route('/myreceipes/copy', methods=['GET', 'POST'])
-def my_receipes_copy():
+@app.route('/myrecipes/copy', methods=['GET', 'POST'])
+def my_recipes_copy():
     database = Database(filename)
     user_id = session['user_id']
     dish_id = request.args['id']
-    database.copyToMyReceipe(user_id, dish_id)
-    return redirect(url_for('receipes'))
+    database.copyToMyRecipe(user_id, dish_id)
+    return redirect(url_for('recipes'))
 
-@app.route('/receipes/delete', methods=['GET', 'POST'])
-def receipes_delete():
+@app.route('/recipes/delete', methods=['GET', 'POST'])
+def recipes_delete():
     database = Database(filename)
-    database.deleteReceipeEntry(request.args['id'])
-    return redirect(url_for('receipes'))
+    database.deleteRecipeEntry(request.args['id'])
+    return redirect(url_for('recipes'))
 
-@app.route('/myreceipes/delete', methods=['GET', 'POST'])
-def my_receipes_delete():
+@app.route('/myrecipes/delete', methods=['GET', 'POST'])
+def my_recipes_delete():
     user_id = session['user_id']
     database = Database(filename)
-    database.deleteMyReceipeEntry(user_id, request.args['id'])
-    return redirect(url_for('my_receipes'))
+    database.deleteMyRecipeEntry(user_id, request.args['id'])
+    return redirect(url_for('my_recipes'))
 
-@app.route('/myreceipes/clear')
-def my_receipes_clear():
+@app.route('/myrecipes/clear')
+def my_recipes_clear():
     user_id = session['user_id']
     database = Database(filename)
-    database.clearReceipe(user_id)
-    return redirect(url_for('my_receipes'))
+    database.clearRecipe(user_id)
+    return redirect(url_for('my_recipes'))
 
 @app.route('/fridges')
 def fridges():
@@ -227,8 +240,8 @@ def fridges():
         if len(fridges) != 0:
             fridges = fridges[0][1].split(' ')
         # now fridges is a list of stock
-        return render_template('fridges.html', user_id=session['user_id'], fridges=fridges, user_name=user_name)
-    return render_template('login_name.html')
+        return render_template('fridges.html', user_id=session['user_id'], fridges=fridges, user_name=user_name, language=session['language'])
+    return render_template('login_name.html', language=session['language'])
 
 @app.route('/fridges/insert', methods=['GET','POST'])
 def fridges_insert():
@@ -268,19 +281,19 @@ def result():
         user_id = session['user_id']
         user_name = database.findUserName(user_id)
         #user_id = 1
-        receipes = database.deliverMyReceipe(user_id)
+        recipes = database.deliverMyRecipe(user_id)
         fridge = database.deliverFridge(user_id)
         if len(fridge) != 0:
             fridge = fridge[0][1]
             fridge = fridge.split(' ')
         # fridge is a list of what you have-unicode
-        # receipes is a list of tuple 
-        receipe_list = list(receipes)
+        # recipes is a list of tuple 
+        recipe_list = list(recipes)
         result_list = []
-        for one_receipe in receipes:
-            dish_num = one_receipe[0]
-            dish_name = one_receipe[1]
-            still_need = one_receipe[2].split(' ') #components is a list of materials.
+        for one_recipe in recipes:
+            dish_num = one_recipe[0]
+            dish_name = one_recipe[1]
+            still_need = one_recipe[2].split(' ') #components is a list of materials.
             what_i_have = []
             for item in fridge:
                 if item in still_need:
@@ -306,8 +319,8 @@ def result():
             result_list.remove(to_delete)
         # soted_result is a list:
         # [dish_num, dish_name, list(what_i_have), list(material still needed), item number still needed]
-        return render_template('result.html', user_id=session['user_id'], data=sorted_result, user_name=user_name)
-    return render_template('login_name.html')
+        return render_template('result.html', user_id=session['user_id'], data=sorted_result, user_name=user_name, language=session['language'])
+    return render_template('login_name.html', language=session['language'])
 
 #######
 # admin
@@ -317,24 +330,24 @@ def admin():
         return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
-    return redirect(url_for('receipes'))
+    return redirect(url_for('recipes'))
             
-@app.route('/admin/myreceipes', methods=['GET', 'POST'])
-def admin_my_receipes():
+@app.route('/admin/myrecipes', methods=['GET', 'POST'])
+def admin_my_recipes():
     if not 'user_id' in session:
         return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
     user_id = request.args['user_id']
-    receipes = []
+    recipes = []
     if request.method == 'POST':
         user_id = request.form['next_user_id']
     database = Database(filename)
-    receipes = database.deliverMyReceipe(user_id)
-    return render_template('admin_my_receipes.html', user_id=user_id, receipes=receipes)
+    recipes = database.deliverMyRecipe(user_id)
+    return render_template('admin_my_recipes.html', user_id=user_id, recipes=recipes)
 
-@app.route('/admin/myreceipes/insert', methods=['GET', 'POST'])
-def admin_my_receipes_insert():
+@app.route('/admin/myrecipes/insert', methods=['GET', 'POST'])
+def admin_my_recipes_insert():
     if not 'user_id' in session:
         return redirect(url_for('login_name'))
     if session['user_id'] != 0:
@@ -345,25 +358,25 @@ def admin_my_receipes_insert():
         database = Database(filename)
         content = request.form['content']
         if content == '':
-            return redirect(url_for('admin_my_receipes', user_id=user_id))
+            return redirect(url_for('admin_my_recipes', user_id=user_id))
         content = Unicode_to_UTF8(content)
         content = content.split(' ')
         dish_name = content[0]
         content.remove(dish_name)
         components = content
-        database.insertMyReceipeEntry(user_id, dish_name, components)
-    return redirect(url_for('admin_my_receipes',user_id=user_id))
+        database.insertMyRecipeEntry(user_id, dish_name, components)
+    return redirect(url_for('admin_my_recipes',user_id=user_id))
 
-@app.route('/admin/myreceipes/delete', methods=['GET', 'POST'])
-def admin_my_receipes_delete():
+@app.route('/admin/myrecipes/delete', methods=['GET', 'POST'])
+def admin_my_recipes_delete():
     if not 'user_id' in session:
         return redirect(url_for('login_name'))
     if session['user_id'] != 0:
         return "You don't have the access!"
     user_id = request.args['current_user_id']
     database = Database(filename)
-    database.deleteMyReceipeEntry(user_id, request.args['id'])
-    return redirect(url_for('admin_my_receipes', user_id=user_id))
+    database.deleteMyRecipeEntry(user_id, request.args['id'])
+    return redirect(url_for('admin_my_recipes', user_id=user_id))
 
 @app.route('/admin/fridges', methods=['GET','POST'])
 def admin_fridges():
@@ -422,11 +435,11 @@ def admin_statistics():
     database = Database(filename)
     conn = sqlite3.connect(filename)
     c = conn.cursor()
-    num_receipes = c.execute('select count(*) from receipes')
-    num_receipes = num_receipes.fetchone()[0]
+    num_recipes = c.execute('select count(*) from recipes')
+    num_recipes = num_recipes.fetchone()[0]
     num_users = c.execute('select count(*) from users')
     num_users = num_users.fetchone()[0]
-    return render_template('admin_statistics.html', num_users=num_users, num_receipes=num_receipes)
+    return render_template('admin_statistics.html', num_users=num_users, num_recipes=num_recipes)
 
 @app.route('/admin/userlist')
 def admin_user_list():

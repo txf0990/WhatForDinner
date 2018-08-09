@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}查看冰箱{% endblock %}
+{% block title %}{% if language=='CHN' %}查看冰箱{% elif language=='ENG' %}My Fridge{% endif %}{% endblock %}
 {% block navbar %}
     {% set page_index = 3 %}
     {% include "navbar.html" %}
 {% endblock %}
 {% block content %}
 <br>
-		<h5>我的冰箱</h5>
-        <a href="{{url_for('fridges_clear')}}">清空我的冰箱</a>
+		<h5>{% if language=='CHN' %}我的冰箱{% elif language=='ENG' %}My Fridge{% endif %}</h5>
+        <a href="{{url_for('fridges_clear')}}">{% if language=='CHN' %}清空我的冰箱{% elif language=='ENG' %}Clear my fridge{% endif %}</a>
 		<table class="table table-striped">
 			<tbody>
 				{% for material in fridges %}
@@ -22,25 +22,45 @@
 				{% endfor %}
 			</tbody>
 		</table>
-        <form name="Message" action="{{ url_for('fridges_insert') }}" method="POST">
-            插入冰箱: <input type="text" name="content">
-            <input type="submit" value="插入">
-        </form>
+        {% if language=='CHN' %}
+            <form name="Message" action="{{ url_for('fridges_insert') }}" method="POST">
+                插入冰箱: <input type="text" name="content">
+                <input type="submit" value="插入">
+            </form>
+        {% elif language=='ENG' %}
+            <form name="Message" action="{{ url_for('fridges_insert') }}" method="POST">
+                Add to fridge: <input type="text" name="content">
+                <input type="submit" value="Add">
+            </form>
+        {% endif %}
         <br>
         <br>
 {% endblock %}
 {% block helper %}
 <p>
-  <a class="btn btn-primary" data-toggle="collapse" href="#helper" role="button" aria-expanded="false" aria-controls="helper">查看冰箱输入格式</a>
+  <a class="btn btn-primary" data-toggle="collapse" href="#helper" role="button" aria-expanded="false" aria-controls="helper">{% if language=='CHN' %}查看冰箱输入格式{% elif language=='ENG' %}How to add materials to my fridge?{% endif %}</a>
 </p>
 <div class="row">
   <div class="col">
     <div class="collapse multi-collapse" id="helper">
       <div class="card card-body">
-        输入格式：在输入框中输入“材料1 材料2 材料3 ...” <br>
-        例如：<br>
-        例1：“鸡蛋 西红柿 茄子” <br>
-        例2：“土豆 鸡蛋 辣椒 洋葱 牛肉 猪肉 排骨” <br>
+        {% if language=='CHN' %}
+            输入格式：在输入框中输入“材料1 材料2 材料3 ...” <br>
+            例如：<br>
+            例1：“鸡蛋 西红柿 茄子” <br>
+            例2：“土豆 鸡蛋 辣椒 洋葱 牛肉 猪肉 排骨” <br>
+        {% elif language=='ENG' %}
+            Format:<br>
+            Spaces between all materials.<br>
+            If there are spaces in one material, please replace all spaces with '_'.<br>
+            All lower case letters.<br>
+            <br>
+            Examples:<br>
+            1. "fish_fillet potato lemon"<br>
+            2. "vinegar honey mustard garlic pepper pork basil tomato"<br>
+            <br>
+            You can add muptiple materials at one time, or you can add one by one.
+        {% endif %}
       </div>
     </div>
   </div>

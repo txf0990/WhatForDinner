@@ -1,35 +1,49 @@
 {% extends "base.html" %}
-{% block title %}登录{% endblock %}
+{% block title %}{% if language=='CHN' %}登录{% elif language=='ENG' %}Log in{% endif %}{% endblock %}
 {% block navbar %}
     {% set user_name = 'Guest' %}
     {% include "navbar.html" %}
 {% endblock %}
 {% block content %}
-		<h5>用户登录</h5>
+		<h5>{% if language=='CHN' %}用户登录{% elif language=='ENG' %}Log in{% endif %}</h5>
         <br>
         <form name="login_email" action="{{ url_for('login_email') }}" method="POST">
+        {% if language=='CHN' %}
 		  <div class="form-group col-md-4">
               <label for="login_email">电子邮箱</label> <a href="/loginname"><font size="2">-->使用用户名登录</font></a>
 			<input type="text" class="form-control" name="user_email" placeholder="请输入电子邮箱地址">
 		  </div>
+        {% elif language=='ENG' %}
+		  <div class="form-group col-md-4">
+              <label for="login_email">Email</label> <a href="/loginname"><font size="2">-->Log in using username</font></a>
+			<input type="text" class="form-control" name="user_email" placeholder="Please enter email">
+		  </div>
+        {% endif %}
+        {% if language=='CHN' %}
 		  <div class="form-group col-md-4">
 			<label for="login_email">密码</label>
 			<input type="password" class="form-control" name="password" placeholder="请输入密码">
 		  </div>
+        {% elif language=='ENG' %}
+		  <div class="form-group col-md-4">
+			<label for="login_email">Password</label>
+			<input type="password" class="form-control" name="password" placeholder="Please enter password">
+		  </div>
+        {% endif %}
           <br>
-		  <button type="submit" class="btn btn-primary">登录</button>
+          <button type="submit" class="btn btn-primary">{% if language=='CHN' %}登录{% elif language=='ENG' %}Log in{% endif %}</button>
 		</form>
         <br>
-        <font size="2">还没有账号？<a href="/register">立即注册</a></font>
+        <font size="2">{% if language=='CHN' %}还没有账号？{% elif language=='ENG' %}Not a registered user? {% endif %}<a href="/register">{% if language=='CHN' %}立即注册{% elif language=='ENG' %}Join now!{% endif %}</a></font>
         <br>
         {% if status==-1 %}
             <div class="alert alert-primary col-md-4" role="alert">
-                用户不存在
+                {% if language=='CHN' %}用户不存在{% elif language=='ENG' %}User does not exist!{% endif %}
             </div>
         {% endif %}
         {% if status==-2 %}
             <div class="alert alert-primary col-md-4" role="alert">
-                用户名密码不匹配
+                {% if language=='CHN' %}用户名密码不匹配{% elif language=='ENG' %}Wrong password!{% endif %}
             </div>
         {% endif %}
 <br>

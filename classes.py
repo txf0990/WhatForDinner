@@ -10,11 +10,11 @@ class Database(object):
     def __init__(self, filename):
         self.conn = sqlite3.connect(filename)
         self.c = self.conn.cursor()
-        self.c.execute("CREATE TABLE IF NOT EXISTS receipes (dish_id integer PRIMARY KEY AUTOINCREMENT, dish_name text, components text)")
+        self.c.execute("CREATE TABLE IF NOT EXISTS recipes (dish_id integer PRIMARY KEY AUTOINCREMENT, dish_name text, components text)")
         self.c.execute("CREATE TABLE IF NOT EXISTS materials (material_id integer PRIMARY KEY AUTOINCREMENT, material_name text)")
         self.c.execute("CREATE TABLE IF NOT EXISTS fridges (user_id integer PRIMARY KEY AUTOINCREMENT, stock text)")
         self.c.execute("CREATE TABLE IF NOT EXISTS users (user_id integer PRIMARY KEY AUTOINCREMENT, user_name text UNIQUE, password text)")
-        self.c.execute("CREATE TABLE IF NOT EXISTS user_receipes (user_id integer, user_receipes text)")
+        self.c.execute("CREATE TABLE IF NOT EXISTS user_recipes (user_id integer, user_recipes text)")
         self.c.execute("CREATE TABLE IF NOT EXISTS user_verify (verification_code text PRIMARY KEY, user_id integer UNIQUE)")
         self.conn.commit()
 
@@ -35,7 +35,7 @@ class Database(object):
             cursor_object = self.c.execute('SELECT * from users WHERE user_name=?',(user_name,))
             list_cursor_object = list(cursor_object)    # it is a list of tuple
             user_id = list_cursor_object[0][0]
-            self.c.execute("INSERT INTO user_receipes Values(?,'1')",(user_id,))
+            self.c.execute("INSERT INTO user_recipes Values(?,'1')",(user_id,))
             self.c.execute("INSERT INTO fridges Values(?,'')",(user_id,))
             verification_code = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(30))
             self.c.execute('INSERT INTO user_verify Values(?,?)', (verification_code, user_id,))
@@ -72,20 +72,20 @@ class Database(object):
         result = []
         result.append(list_cursor_object[0][1])
         result.append(list_cursor_object[0][2])
-        cursor_object = self.c.execute('SELECT * FROM user_receipes WHERE user_id=?', (user_id,))
+        cursor_object = self.c.execute('SELECT * FROM user_recipes WHERE user_id=?', (user_id,))
         list_cursor_object = list(cursor_object)
         result.append(len(list_cursor_object[0][1].split(' ')))
-        return result        # user_name, user_email, receipe number.
+        return result        # user_name, user_email, recipe number.
 
-    def insertReceipeEntry(self, dish_name, materials):
+    def insertRecipeEntry(self, dish_name, materials):
         materials.sort()
         materials_text = ""
         for item in materials:
             self.c.execute("INSERT INTO materials (material_name) SELECT ? WHERE NOT EXISTS(SELECT 1 FROM materials WHERE material_name=?)",(UTF8_to_Unicode(item), UTF8_to_Unicode(item)))
             materials_text = materials_text + item + " "
         materials_text = materials_text[:-1]
-        # first, check if this receipe already exists.
-        cursor_object = self.c.execute("SELECT * FROM receipes WHERE components=?",(UTF8_to_Unicode(materials_text),))
+        # first, check if this recipe already exists.
+        cursor_object = self.c.execute("SELECT * FROM recipes WHERE components=?",(UTF8_to_Unicode(materials_text),))
         list_cursor_object = list(cursor_object)
         if len(list_cursor_object) != 0:
             for item in list_cursor_object:
@@ -93,76 +93,76 @@ class Database(object):
                     self.conn.commit()
                     return item[0]
         else:
-            self.c.execute("INSERT INTO receipes (dish_name, components) Values(?,?)", (UTF8_to_Unicode(dish_name), UTF8_to_Unicode(materials_text)))
-            cursor_object = self.c.execute("SELECT * FROM receipes WHERE dish_id=last_insert_rowid()");
+            self.c.execute("INSERT INTO recipes (dish_name, components) Values(?,?)", (UTF8_to_Unicode(dish_name), UTF8_to_Unicode(materials_text)))
+            cursor_object = self.c.execute("SELECT * FROM recipes WHERE dish_id=last_insert_rowid()");
             list_cursor_object = list(cursor_object)
             self.conn.commit()
             return list_cursor_object[0][0] # return a int.
         
             
-    def deleteReceipeEntry(self, dish_id):
-        self.c.execute("DELETE FROM receipes WHERE dish_id=?",(dish_id,))
+    def deleteRecipeEntry(self, dish_id):
+        self.c.execute("DELETE FROM recipes WHERE dish_id=?",(dish_id,))
         self.conn.commit()
 
-    def deliverReceipe(self):
-        cursor_object = self.c.execute("SELECT * FROM receipes")
+    def deliverRecipe(self):
+        cursor_object = self.c.execute("SELECT * FROM recipes")
         list_cursor_object = list(cursor_object)    # list_cursor_object is a list of tuple, like: [(1, u'HongShaoRou', u'ZhuRou Tang BaJiao'), (3, u'XiHongShiChaoJiDan', u'XiHongShi JiDan Tang'), (4, u'TangCuPaiGu', u'PaiGu Tang Cu')]
         #list_cursor_object = map(lambda (a, b, c):(a, Unicode_to_UTF8(b), Unicode_to_UTF8(c)),
         #        list_cursor_object)
         return list_cursor_object
 ########
     #  联合查询
-    def insertMyReceipeEntry(self, user_id, dish_name, materials):
-        last_insert_id = self.insertReceipeEntry(dish_name, materials)
+    def insertMyRecipeEntry(self, user_id, dish_name, materials):
+        last_insert_id = self.insertRecipeEntry(dish_name, materials)
         print last_insert_id
-        cursor_object = self.c.execute("SELECT * FROM user_receipes WHERE user_id=?",(user_id,))
+        cursor_object = self.c.execute("SELECT * FROM user_recipes WHERE user_id=?",(user_id,))
         list_cursor_object = list(cursor_object)        # [(1,'1 2 3')]
-        receipe_list = []
-        receipe_list_text = ''
+        recipe_list = []
+        recipe_list_text = ''
         if len(list_cursor_object) != 0:
-            receipe_list_text = list_cursor_object[0][1]
-            receipe_list = receipe_list_text.split(' ')     # ['1','2','3']
-        if not str(last_insert_id) in receipe_list:
-            receipe_list_text = receipe_list_text + ' ' + str(last_insert_id)
-            self.c.execute("UPDATE user_receipes SET user_receipes=? WHERE user_id=?", (receipe_list_text, user_id))    
+            recipe_list_text = list_cursor_object[0][1]
+            recipe_list = recipe_list_text.split(' ')     # ['1','2','3']
+        if not str(last_insert_id) in recipe_list:
+            recipe_list_text = recipe_list_text + ' ' + str(last_insert_id)
+            self.c.execute("UPDATE user_recipes SET user_recipes=? WHERE user_id=?", (recipe_list_text, user_id))    
             self.conn.commit()
     
-    def copyToMyReceipe(self, user_id, dish_id):
-        cursor_object = self.c.execute('SELECT * FROM user_receipes WHERE user_id=?',(user_id,))
+    def copyToMyRecipe(self, user_id, dish_id):
+        cursor_object = self.c.execute('SELECT * FROM user_recipes WHERE user_id=?',(user_id,))
         list_cursor_object = list(cursor_object)
-        receipe_list = list_cursor_object[0][1].split(' ')
-        if not dish_id in receipe_list:
-            receipe_list.append(dish_id)
-            receipe_text = ' '.join(receipe_list)
-            self.c.execute('UPDATE user_receipes SET user_receipes=? WHERE user_id=?',(receipe_text, user_id,))
+        recipe_list = list_cursor_object[0][1].split(' ')
+        if not dish_id in recipe_list:
+            recipe_list.append(dish_id)
+            recipe_text = ' '.join(recipe_list)
+            self.c.execute('UPDATE user_recipes SET user_recipes=? WHERE user_id=?',(recipe_text, user_id,))
             self.conn.commit()
 
 
-    def deleteMyReceipeEntry(self, user_id, dish_id):
-        cursor_object = self.c.execute("SELECT * FROM user_receipes WHERE user_id=?",(user_id,))
+    def deleteMyRecipeEntry(self, user_id, dish_id):
+        cursor_object = self.c.execute("SELECT * FROM user_recipes WHERE user_id=?",(user_id,))
         list_cursor_object = list(cursor_object)        # [(1,'1 2 3')]
-        receipe_list = list_cursor_object[0][1].split(' ')  #['1','2','3']
-        receipe_list.remove(str(dish_id))
-        receipe_list_text = ' '.join(receipe_list)
-        self.c.execute("UPDATE user_receipes SET user_receipes=? WHERE user_id=?", (receipe_list_text, user_id))
+        recipe_list = list_cursor_object[0][1].split(' ')  #['1','2','3']
+        recipe_list.remove(str(dish_id))
+        recipe_list_text = ' '.join(recipe_list)
+        self.c.execute("UPDATE user_recipes SET user_recipes=? WHERE user_id=?", (recipe_list_text, user_id))
         self.conn.commit()
 
-    def deliverMyReceipe(self, user_id):
-        cursor_object = self.c.execute("SELECT * FROM user_receipes WHERE user_id=?", (user_id,))
-        list_cursor_object = list(cursor_object)    # a list of receipes to show: [(1,'1 2 3')] user_id, user_receipes
-        receipes_to_show = []
+    def deliverMyRecipe(self, user_id):
+        cursor_object = self.c.execute("SELECT * FROM user_recipes WHERE user_id=?", (user_id,))
+        list_cursor_object = list(cursor_object)    # a list of recipes to show: [(1,'1 2 3')] user_id, user_recipes
+        recipes_to_show = []
         if len(list_cursor_object) != 0:
             list_cursor_object = list_cursor_object[0][1].split(' ')        # ['1','2','3']
             if len(list_cursor_object) != 0:
                 for dish_id in list_cursor_object:
                     if dish_id == '':
                         continue
-                    temp_object = self.c.execute("SELECT * FROM receipes WHERE dish_id=?", (int(dish_id),))
+                    temp_object = self.c.execute("SELECT * FROM recipes WHERE dish_id=?", (int(dish_id),))
                     list_temp_object = list(temp_object)        # [(1,'西红柿炒鸡蛋','西红柿 鸡蛋')]
                     if len(list_temp_object) != 0:
                         temp_tuple = list_temp_object[0]
-                        receipes_to_show.append(temp_tuple)
-        return receipes_to_show               # I want to return a list of tuple.
+                        recipes_to_show.append(temp_tuple)
+        return recipes_to_show               # I want to return a list of tuple.
 
 #######
 
@@ -230,8 +230,8 @@ class Database(object):
             return -2
         return list_cursor_object[0][0]         # return the user_id
     
-    def clearReceipe(self, user_id):
-        self.c.execute("UPDATE user_receipes SET user_receipes='' WHERE user_id=?",(user_id,))
+    def clearRecipe(self, user_id):
+        self.c.execute("UPDATE user_recipes SET user_recipes='' WHERE user_id=?",(user_id,))
         self.conn.commit()
 
     def clearFridge(self, user_id):

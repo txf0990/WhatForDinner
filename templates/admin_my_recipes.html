@@ -6,25 +6,25 @@
 {% endblock %}
 {% block content %}
 <h5>User {{ user_id }}'s Receipes</h5>
-<form name="find_user" action="{{ url_for('admin_my_receipes', user_id=user_id) }}" method="POST">
+<form name="find_user" action="{{ url_for('admin_my_recipes', user_id=user_id) }}" method="POST">
             下一位查看的用户 ID: <input type="number" name="next_user_id"> <input type="submit" value="提交">
         </form>
         <br>
 		<table class="table table-striped">
 			<tbody>
-				{% for receipe in receipes %}
+				{% for recipe in recipes %}
 				<tr class="d-flex">
-					<td class="col-1">{{ receipe[0] }}</td>
-					<td class="col-2">{{ receipe[1] }}</td>
-					<td class="col-8">{{ receipe[2] }}</td>
-					<td class="col-1"><a href="{{ url_for('admin_my_receipes_delete', id=receipe[0], current_user_id=user_id)}}">
+					<td class="col-1">{{ recipe[0] }}</td>
+					<td class="col-2">{{ recipe[1] }}</td>
+					<td class="col-8">{{ recipe[2] }}</td>
+					<td class="col-1"><a href="{{ url_for('admin_my_recipes_delete', id=recipe[0], current_user_id=user_id)}}">
 						<button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 					</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>
 		</table>
-        <form name="Message" action="{{ url_for('admin_my_receipes_insert') }}" method="POST">
+        <form name="Message" action="{{ url_for('admin_my_recipes_insert') }}" method="POST">
             插入菜谱: <input type="text" name="content"> <br>
             当前处理的用户 ID: <input type="radio" name="current_user_id" value="{{ user_id }}" checked="checked">{{ user_id }}<br><br>
             <input type="submit" value="提交">

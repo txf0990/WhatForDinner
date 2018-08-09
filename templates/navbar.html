@@ -1,5 +1,5 @@
 <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary" style="background-color: #e3f2fd;">
-    <a class="navbar-brand" href="{{ url_for('index') }}">吃点啥</a>
+    <a class="navbar-brand" href="{{ url_for('index') }}">{% if language=='CHN' %}吃点啥{% elif language=='ENG' %}EatWhat{% endif %}</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -7,24 +7,29 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item{% if page_index==1 %} active{% endif %}">
-            <a class="nav-link" href="{{ url_for('receipes') }}">所有菜谱{% if page_index==1 %}<span class="sr-only">(current)</span>{% endif %}</a>
+          <a class="nav-link" href="{{ url_for('recipes') }}">{% if language=='CHN' %}所有菜谱{% elif language=='ENG' %}All Receipes{% endif %}{% if page_index==1 %}<span class="sr-only">(current)</span>{% endif %}</a>
       </li>
       <li class="nav-item{% if page_index==2 %} active{% endif %}">
-            <a class="nav-link" href="{{ url_for('my_receipes') }}">我的菜谱{% if page_index==2 %}<span class="sr-only">(current)</span>{% endif %}</a>
+          <a class="nav-link" href="{{ url_for('my_recipes') }}">{% if language=='CHN' %}我的菜谱{% elif language=='ENG' %}My Receipes{% endif %}{% if page_index==2 %}<span class="sr-only">(current)</span>{% endif %}</a>
       </li>
       <li class="nav-item{% if page_index==3 %} active{% endif %}">
-        <a class="nav-link" href="{{ url_for('fridges') }}">我的冰箱{% if page_index==3 %}<span class="sr-only">(current)</span>{% endif %}</a>
+          <a class="nav-link" href="{{ url_for('fridges') }}">{% if language=='CHN'%}我的冰箱{% elif language=='ENG'%}My Fridge{% endif %}{% if page_index==3 %}<span class="sr-only">(current)</span>{% endif %}</a>
       </li>
       <li class="nav-item{% if page_index==4 %} active{% endif %}">
-        <a class="nav-link" href="{{ url_for('result') }}">查看结果{% if page_index==4 %}<span class="sr-only">(current)</span>{% endif %}</a>
+          <a class="nav-link" href="{{ url_for('result') }}">{% if language=='CHN' %}查看结果{% elif language=='ENG' %}Result{% endif %}{% if page_index==4 %}<span class="sr-only">(current)</span>{% endif %}</a>
       </li>
   </div>
+  <span class="badge badge-pill badge-warning">
+      {% if language=='CHN' %}<a href="{{ url_for('change_language_ce')}}">English</a>
+      {% elif language=='ENG' %}<a href="{{ url_for('change_language_ec')}}">中文</a>
+      {% endif %}
+  </span>
   <span class="navbar-text">
-      <a href="{{ url_for('profile') }}">欢迎回来, {{ user_name }}!</a>
+      <a href="{{ url_for('profile') }}">{% if language=='CHN' %}欢迎回来{% elif language=='ENG' %}Welcome back{% endif %}, {{ user_name }}!</a>
   </span>
   {% if user_id==9988 %}
-      <a type="button" class="btn btn-outline-primary d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3" href="/loginname">登录/注册</a>
+  <a type="button" class="btn btn-outline-primary d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3" href="/loginname">{% if language=='CHN' %}登录/注册{% elif language=='ENG' %}Log in/Sign up{% endif %}</a>
   {% else %}
-      <a type="button" class="btn btn-outline-primary d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3" href="/logout">退出</a>
+      <a type="button" class="btn btn-outline-primary d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3" href="/logout">{% if language=='CHN' %}退出{% elif language=='ENG' %}Log out{% endif %}</a>
   {% endif %}
 </nav>
