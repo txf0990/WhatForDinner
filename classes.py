@@ -31,7 +31,7 @@ class Database(object):
         elif len(list_cursor_object1) == 0 and len(list_cursor_object2) != 0:
             return -3  # existed email
         else:
-            self.c.execute('INSERT INTO users(user_name,user_email,password,user_group) Values(?,?,?,?)',(user_name, user_email,password,1,))  #  user_group=1 是已经验证邮箱的用户。user_group=2是刚注册还未验证邮箱的用户
+            self.c.execute('INSERT INTO users(user_name,user_email,password,user_group) Values(?,?,?,?)',(user_name, user_email,md5(password+'chidiansha'),1,))  #  user_group=1 是已经验证邮箱的用户。user_group=2是刚注册还未验证邮箱的用户
             cursor_object = self.c.execute('SELECT * from users WHERE user_name=?',(user_name,))
             list_cursor_object = list(cursor_object)    # it is a list of tuple
             user_id = list_cursor_object[0][0]
@@ -249,5 +249,9 @@ def ifValidUsername(user_name):
         return false
     else:
         return true
-
+def md5(str):
+    import hashlib
+    m = hashlib.md5()   
+    m.update(str)
+    return m.hexdigest()
 

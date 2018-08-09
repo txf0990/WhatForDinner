@@ -5,7 +5,9 @@
     {% include "navbar.html" %}
 {% endblock %}
 {% block content %}
+<br>
 		<h5>我的冰箱</h5>
+        <a href="{{url_for('fridges_clear')}}">清空我的冰箱</a>
 		<table class="table table-striped">
 			<tbody>
 				{% for material in fridges %}
@@ -26,5 +28,21 @@
         </form>
         <br>
         <br>
-        <a href="{{url_for('fridges_clear')}}">清空我的冰箱</a>
+{% endblock %}
+{% block helper %}
+<p>
+  <a class="btn btn-primary" data-toggle="collapse" href="#helper" role="button" aria-expanded="false" aria-controls="helper">查看冰箱输入格式</a>
+</p>
+<div class="row">
+  <div class="col">
+    <div class="collapse multi-collapse" id="helper">
+      <div class="card card-body">
+        输入格式：在输入框中输入“材料1 材料2 材料3 ...” <br>
+        例如：<br>
+        例1：“鸡蛋 西红柿 茄子” <br>
+        例2：“土豆 鸡蛋 辣椒 洋葱 牛肉 猪肉 排骨” <br>
+      </div>
+    </div>
+  </div>
+</div> 
 {% endblock %}

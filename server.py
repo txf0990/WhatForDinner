@@ -15,6 +15,11 @@ def ifValidEmail(email):
     if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", email) != None:
         return True
     return False
+def md5(str):
+    import hashlib
+    m = hashlib.md5()   
+    m.update(str)
+    return m.hexdigest()
 
 app = Flask(__name__)
 
@@ -31,7 +36,7 @@ def login_name():
     status = 0
     if request.method == 'POST':
         user_name = request.form['user_name']
-        password = request.form['password']
+        password = md5(request.form['password'] + 'chidiansha')
         database = Database(filename)
         user_id = database.verifyPassword_user_name(user_name, password)
         if user_id == -1:       # user does not exist
@@ -44,7 +49,7 @@ def login_name():
         else:                # 判断用户名密码是否匹配
             session['user_id'] = user_id
             return redirect(url_for('result'))
-    return render_template('login_name.html', status=status)
+    return render_template('login_name.html', status=status, user_id=session['user_id'])
     
 @app.route('/loginemail', methods=['GET', 'POST'])
 def login_email():
