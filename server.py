@@ -145,7 +145,6 @@ def hello_sb(username):
 
 @app.route('/recipes')
 def recipes():
-    print session['language']
     if 'user_id' in session:
         user_id = session['user_id']
         database = Database(filename)
