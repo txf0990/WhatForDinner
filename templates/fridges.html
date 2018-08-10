@@ -22,6 +22,7 @@
 				{% endfor %}
 			</tbody>
 		</table>
+        <br><br>
         {% if language=='CHN' %}
             <form name="Message" action="{{ url_for('fridges_insert') }}" method="POST">
                 插入冰箱: <input type="text" name="content">
