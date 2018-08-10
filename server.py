@@ -5,7 +5,7 @@ import re
 import sqlite3
 from classes import Database
 
-filename = 'test.db'
+filename = 'chidiansha.db'
 
 def UTF8_to_Unicode(s):
     return s.decode('utf8')
@@ -459,4 +459,4 @@ app.secret_key = '\ng\xaa!\x01\xd8\xd2%Ftz}m\xf0\xa1\xe6\xdf\xe8I\x8a\xb8\x80\xb
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 import sqlite3
-filename = 'test.db'
+filename = 'chidiansha.db'
 conn = sqlite3.connect(filename)
 c = conn.cursor()
 c.execute("CREATE TABLE users (user_id integer PRIMARY KEY, user_name text UNIQUE, user_email text UNIQUE, password text, user_group integer)")
-c.execute("INSERT INTO users VALUES(0,'admin','admin@gmail.com','310223c97def9d998a17702ef57361cc', 0)")
+c.execute("INSERT INTO users VALUES(0,'admin','admin@gmail.com','02c6524a4588768a39f5ee6a3d2d52ea', 0)")
 c.execute("INSERT INTO users VALUES(9988,'Guest','','', 1)")
 
 c.execute("CREATE TABLE fridges (user_id integer PRIMARY KEY AUTOINCREMENT, stock text)")
