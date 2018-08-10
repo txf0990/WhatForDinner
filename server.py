@@ -40,7 +40,7 @@ def index():
     if 'user_id' in session:
         return redirect(url_for('recipes'))
     else:
-        session['user_id'] = 9988
+        session['user_id'] = 1
     return redirect(url_for('recipes'))
 
 @app.route('/loginname', methods=['GET', 'POST'])

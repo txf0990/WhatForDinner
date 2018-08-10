@@ -27,7 +27,7 @@
   <span class="navbar-text">
       <a href="{{ url_for('profile') }}">{% if language=='CHN' %}你好{% elif language=='ENG' %}Hello{% endif %}, {{ user_name }}</a>
   </span>
-  {% if user_id==9988 %}
+  {% if user_id==1 %}
   <a type="button" class="btn btn-primary my-2 my-sm-0" href="/loginname">{% if language=='CHN' %}登录/注册{% elif language=='ENG' %}Log in/Sign up{% endif %}</a>
   {% else %}
       <a type="button" class="btn btn-primary my-2 my-sm-0" href="/logout">{% if language=='CHN' %}退出{% elif language=='ENG' %}Log out{% endif %}</a>

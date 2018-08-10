@@ -92,12 +92,12 @@ class Database(object):
                 if item[1] == UTF8_to_Unicode(dish_name) and item[2] == UTF8_to_Unicode(materials_text):
                     self.conn.commit()
                     return item[0]
-        else:
-            self.c.execute("INSERT INTO recipes (dish_name, components) Values(?,?)", (UTF8_to_Unicode(dish_name), UTF8_to_Unicode(materials_text)))
-            cursor_object = self.c.execute("SELECT * FROM recipes WHERE dish_id=last_insert_rowid()");
-            list_cursor_object = list(cursor_object)
-            self.conn.commit()
-            return list_cursor_object[0][0] # return a int.
+
+        self.c.execute("INSERT INTO recipes (dish_name, components) Values(?,?)", (UTF8_to_Unicode(dish_name), UTF8_to_Unicode(materials_text)))
+        cursor_object = self.c.execute("SELECT * FROM recipes WHERE dish_id=last_insert_rowid()");
+        list_cursor_object = list(cursor_object)
+        self.conn.commit()
+        return list_cursor_object[0][0] # return a int.
         
             
     def deleteRecipeEntry(self, dish_id):

@@ -8,6 +8,17 @@
 <br>
 		<h5>{% if language=='CHN' %}我的菜谱{% elif language=='ENG' %}My Recipes{% endif %}</h5>
         <a href="{{url_for('my_recipes_clear')}}">{% if language=='CHN' %}清空我的菜谱{% elif language=='ENG' %}Clear my recipes{% endif %}</a>
+        <br>
+        {% if language=='CHN' %}
+        <form name="Message" action="{{ url_for('my_recipes_insert') }}" method="POST">
+            插入菜谱: <input type="text" name="content"> <input type="submit" value="提交">
+        </form>
+        {% elif language=='ENG' %}
+        <form name="Message" action="{{ url_for('my_recipes_insert') }}" method="POST">
+            Insert a recipe: <input type="text" name="content"> <input type="submit" value="Submit">
+        </form> 
+        {% endif %}
+        <br>
 		<table class="table table-striped">
 			<tbody>
 				{% for recipe in recipes %}
@@ -22,16 +33,6 @@
 			</tbody>
 		</table>
         <br><br>
-        {% if language=='CHN' %}
-        <form name="Message" action="{{ url_for('my_recipes_insert') }}" method="POST">
-            插入菜谱: <input type="text" name="content"> <input type="submit" value="提交">
-        </form>
-        {% elif language=='ENG' %}
-        <form name="Message" action="{{ url_for('my_recipes_insert') }}" method="POST">
-            Insert a recipe: <input type="text" name="content"> <input type="submit" value="Submit">
-        </form> 
-        {% endif %}
-        <br>
         <br>
 {% endblock %}
 {% block helper %}
