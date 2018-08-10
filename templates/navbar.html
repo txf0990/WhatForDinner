@@ -25,11 +25,11 @@
       {% endif %}
   </span>
   <span class="navbar-text">
-      <a href="{{ url_for('profile') }}">{% if language=='CHN' %}欢迎回来{% elif language=='ENG' %}Welcome back{% endif %}, {{ user_name }}!</a>
+      <a href="{{ url_for('profile') }}">{% if language=='CHN' %}你好{% elif language=='ENG' %}Hello{% endif %}, {{ user_name }}</a>
   </span>
   {% if user_id==9988 %}
-  <a type="button" class="btn btn-outline-primary d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3" href="/loginname">{% if language=='CHN' %}登录/注册{% elif language=='ENG' %}Log in/Sign up{% endif %}</a>
+  <a type="button" class="btn btn-primary my-2 my-sm-0" href="/loginname">{% if language=='CHN' %}登录/注册{% elif language=='ENG' %}Log in/Sign up{% endif %}</a>
   {% else %}
-      <a type="button" class="btn btn-outline-primary d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3" href="/logout">{% if language=='CHN' %}退出{% elif language=='ENG' %}Log out{% endif %}</a>
+      <a type="button" class="btn btn-primary my-2 my-sm-0" href="/logout">{% if language=='CHN' %}退出{% elif language=='ENG' %}Log out{% endif %}</a>
   {% endif %}
 </nav>
