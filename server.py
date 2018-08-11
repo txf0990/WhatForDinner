@@ -101,9 +101,10 @@ def register():
             return render_template('register.html', status=-5, language=session['language'], user_name=user_name)
 
         password = request.form['password']
+        password1 = request.form['password1']
         database = Database(filename)
-        status = database.insertUser(user_name, user_email, password)
-        if status != 0 and status != -1 and status != -2 and status != -3 and status != -4 and status != -5:
+        status = database.insertUser(user_name, user_email, password, password1)
+        if status != 0 and status != -1 and status != -2 and status != -3 and status != -4 and status != -5 and status != -6:
             session['user_id'] = status
             return redirect(url_for('result'))
 

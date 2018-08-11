@@ -18,7 +18,7 @@ class Database(object):
         self.c.execute("CREATE TABLE IF NOT EXISTS user_verify (verification_code text PRIMARY KEY, user_id integer UNIQUE)")
         self.conn.commit()
 
-    def insertUser(self, user_name, user_email, password):
+    def insertUser(self, user_name, user_email, password, password1):
         cursor_object1 = self.c.execute('SELECT * FROM users WHERE user_name=?', (user_name,))
         list_cursor_object1 = list(cursor_object1)
         cursor_object2 = self.c.execute('SELECT * FROM users WHERE user_email=?', (user_email,))
@@ -30,6 +30,8 @@ class Database(object):
             return -2  # existed username
         elif len(list_cursor_object1) == 0 and len(list_cursor_object2) != 0:
             return -3  # existed email
+        elif password != password1:
+            return -6   # passwords don't match
         else:
             self.c.execute('INSERT INTO users(user_name,user_email,password,user_group) Values(?,?,?,?)',(user_name, user_email,md5(password+'chidiansha'),1,))  #  user_group=1 是已经验证邮箱的用户。user_group=2是刚注册还未验证邮箱的用户
             cursor_object = self.c.execute('SELECT * from users WHERE user_name=?',(user_name,))

@@ -50,11 +50,24 @@
             {% endif %}
 		  </div>
 		  <div class="form-group col-md-3">
-			<label for="login_name">{% if language=='CHN' %}密码{% elif language=='ENG' %}Password{% endif %}</label>
+			<label for="password">{% if language=='CHN' %}密码{% elif language=='ENG' %}Password{% endif %}</label>
             {% if language=='CHN' %}
 			<input type="password" class="form-control" name="password" placeholder="请输入密码">
             {% elif language=='ENG' %}
 			<input type="password" class="form-control" name="password" placeholder="Please enter password">
+            {% endif %}
+		  </div>
+		  <div class="form-group col-md-3">
+			<label for="password1">{% if language=='CHN' %}重新输入密码{% elif language=='ENG' %}Confirm password{% endif %}</label>
+            {% if language=='CHN' %}
+			<input type="password" class="form-control" name="password1" placeholder="请输入密码">
+            {% elif language=='ENG' %}
+			<input type="password" class="form-control" name="password1" placeholder="Please enter password">
+            {% endif %}
+            {% if status==-6 %}
+            <div class="alert alert-danger" role="alert">
+                  {% if language=='CHN' %} 输入密码不匹配{% elif language=='ENG' %}Passwords don't match.{% endif %}
+            </div>
             {% endif %}
 		  </div>
           <br>
