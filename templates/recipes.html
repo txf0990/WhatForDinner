@@ -12,6 +12,14 @@
 <br>
 		<h5>{% if language=='CHN' %}浏览所有菜谱{% elif language=='ENG' %}Browse All Recipes{% endif %}</h5>
         <br>
+        {% if user_id != 1 %}
+        <form name="Message" action="{{ url_for('recipes_insert') }}" method="POST">
+            {% if language=='CHN' %}插入菜谱: <input type="text" name="content"> <input type="submit" value="提交">
+{% elif language=='ENG' %}Insert a recipe: <input type="text" name="content"> <input type="submit" value="Submit">
+{% endif %}
+        </form>
+        {% endif %}
+        <br>
 		<table class="table table-striped">
 			<tbody>
 				{% for recipe in recipes %}
@@ -35,15 +43,11 @@
 				{% endfor %}
 			</tbody>
 		</table>
-        <form name="Message" action="{{ url_for('recipes_insert') }}" method="POST">
-            {% if language=='CHN' %}插入菜谱: <input type="text" name="content"> <input type="submit" value="提交">
-{% elif language=='ENG' %}Insert a recipe: <input type="text" name="content"> <input type="submit" value="Submit">
-{% endif %}
-        </form>
         <br>
         <br>
 {% endblock %}
 {% block helper %}
+{% if user_id != 1 %}
 <p>
   <a class="btn btn-primary" data-toggle="collapse" href="#helper" role="button" aria-expanded="false" aria-controls="helper">{% if language=='CHN' %}查看菜谱输入格式{% elif language=='ENG' %}How to insert an entry?{% endif %}</a>
 </p>
@@ -76,4 +80,5 @@
     </div>
   </div>
 </div> 
+{% endif %}
 {% endblock %}
