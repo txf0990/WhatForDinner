@@ -38,6 +38,24 @@
         <br>
 {% endblock %}
 {% block helper %}
+{% if user_id==1 %}
+<p>
+  <a class="btn btn-primary" data-toggle="collapse" href="#helper" role="button" aria-expanded="false" aria-controls="helper">{% if language=='CHN' %}无法添加菜谱？{% elif language=='ENG' %}Can't insert an entry?{% endif %}</a>
+</p>
+<div class="row">
+  <div class="col">
+    <div class="collapse multi-collapse" id="helper">
+      <div class="card card-body">
+        {% if language=='CHN' %}
+        成为注册用户，便可以增删自定义菜谱
+        {% elif language=='ENG' %}
+        Register and you will be able to add/delete your own recipe entries.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
 <p>
   <a class="btn btn-primary" data-toggle="collapse" href="#helper" role="button" aria-expanded="false" aria-controls="helper">{% if language=='CHN' %}查看菜谱输入格式{% elif language=='ENG' %}How to insert an entry?{% endif %}</a>
 </p>
@@ -70,5 +88,6 @@
       </div>
     </div>
   </div>
-</div> 
+</div>
+{% endif %}
 {% endblock %}
