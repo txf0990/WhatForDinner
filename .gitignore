@@ -103,7 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+chidiansha.db
 test.db
-test.py
 .DS_Store
 *.swp
