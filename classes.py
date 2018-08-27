@@ -65,6 +65,8 @@ class Database(object):
     def findUserName(self, user_id):
         cursor_object = self.c.execute('SELECT user_name FROM users WHERE user_id=?', (user_id,))
         list_cursor_object = list(cursor_object)
+        if len(list_cursor_object) == 0:
+            raise Exception('Cannot find user_id: {}'.format(user_id))
         name = list_cursor_object[0][0]
         return name
     
