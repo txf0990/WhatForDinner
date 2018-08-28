@@ -5,7 +5,8 @@ import re
 import sqlite3
 from classes import Database
 
-filename = '/home/ubuntu/WhatForDinner/chidiansha.db'
+import LocalConfig
+filename = LocalConfig.filename
 
 def UTF8_to_Unicode(s):
     return s.decode('utf8')
